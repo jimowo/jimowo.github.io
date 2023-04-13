@@ -22,7 +22,7 @@ export default defineUserConfig({
                 link: 'https://space.bilibili.com/3343507',
             }
         ],
-        repo: 'jimowo/VuePress-',
+        repo: 'jimowo/jimowo.github.io',
         sidebar: [{
                 'text': '前言',
                 'link': '/',
