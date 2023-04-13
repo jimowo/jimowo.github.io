@@ -3493,7 +3493,7 @@ class B extends A {
   
   2. 底层是一个LinkedHashMap，数组加双向链表
      
-     ![image-20220315152712745](\java笔记图片\image-20220315152712745.png)
+     ![image-20220315152712745](./img/Java基础笔记.assets/image-20220315152712745.png)
      
      可以看出比HashSet多了before和after分别指向前一个add和后一个add，这样就可以保证遍历的时候按add顺序遍历
 
@@ -4603,7 +4603,7 @@ class DeadLockDemo extends Thread {
 
 - **IO流 体系图**
   
-  ![image-20220322201439166](/java笔记图片/image-20220322201439166.png)
+  ![image-20220322201439166](./img/Java基础笔记.assets/image-20220322201439166.png)
 
 - **FileInputStream介绍**
   
