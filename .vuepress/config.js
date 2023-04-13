@@ -22,7 +22,7 @@ export default defineUserConfig({
                 link: 'https://space.bilibili.com/3343507',
             }
         ],
-        repo: 'meathill/gitbook-design-patterns-in-jquery',
+        repo: 'jimowo/VuePress-',
         sidebar: [{
                 'text': '前言',
                 'link': '/',
@@ -38,7 +38,7 @@ export default defineUserConfig({
     }),
     plugins: [
         googleAnalyticsPlugin({
-            id: 'G-6X03SBJR88',
+            id: '',
         }),
         registerComponentsPlugin({
             components: {
