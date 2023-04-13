@@ -560,7 +560,7 @@ List list = userMapperImpl.getUserFromTable("user");
 
 数据库的数据名
 
-![image-20221104140010926](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\MyBatis笔记.assets\image-20221104140010926.png)
+![image-20221104140010926](./img/MyBatis笔记.assets/image-20221104140010926.png)
 
 实体类字段名
 

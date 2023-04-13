@@ -17,7 +17,7 @@
 
 #### TCP/IP协议族
 
-![image-20220424153500110](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220424153500110.png)	
+![image-20220424153500110](./img/图集HTTP笔记.assets/image-20220424153500110.png)	
 
 #### TCP/IP的分层管理
 
@@ -30,11 +30,11 @@ TCP/IP分为4层：应用层、传输层、网络层、数据链路层
 
 #### TCP/IP通信传输
 
-![image-20220424161324998](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220424161324998.png)	
+![image-20220424161324998](./img/图集HTTP笔记.assets/image-20220424161324998.png)	
 
 数据每通过一层都会加上该层的首部
 
-![image-20220424161516323](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220424161516323.png)	
+![image-20220424161516323](./img/图集HTTP笔记.assets/image-20220424161516323.png)	
 
 ### 1.4 与HTTP关系密切的协议
 
@@ -52,7 +52,7 @@ MAC地址是网卡所属的固定地址
 
 - 确保数据能准确发送：发送后会进行三次握手，确保数据发送成功
 
-  ![image-20220424163837296](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220424163837296.png)	
+  ![image-20220424163837296](./img/图集HTTP笔记.assets/image-20220424163837296.png)	
 
 ### 1.5 负责域名解析的DNS服务
 
@@ -60,11 +60,11 @@ DNS是HTTP一样位于应用层的协议，提供域名到IP地址之间的解�
 
 xxx.com就是域名，DNS把它转成IP地址
 
-​	![image-20220424164322950](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220424164322950.png)
+​	![image-20220424164322950](./img/图集HTTP笔记.assets/image-20220424164322950.png)
 
 ### 1.6 HTTP通信的流程
 
-![image-20220424164647288](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220424164647288.png)	
+![image-20220424164647288](./img/图集HTTP笔记.assets/image-20220424164647288.png)	
 
 ### 1.7 URI和URL
 
@@ -72,7 +72,7 @@ xxx.com就是域名，DNS把它转成IP地址
 
 - URI的格式
 
-  ![image-20220424164952584](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220424164952584.png)	
+  ![image-20220424164952584](./img/图集HTTP笔记.assets/image-20220424164952584.png)	
 
   登录信息：指定用户名和密码作为从服务器获得资源时的登录信息（可选）
 
@@ -162,21 +162,21 @@ OPTIONS * HTTP/1.1
 
 ### 2.5 告知服务器意图的 HTTP方法
 
-![image-20220530215006775](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220530215006775.png)	
+![image-20220530215006775](./img/图集HTTP笔记.assets/image-20220530215006775.png)	
 
 GET：获取资源
 
-![image-20220530214309518](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220530214309518.png)	
+![image-20220530214309518](./img/图集HTTP笔记.assets/image-20220530214309518.png)	
 
 POST：传输实体
 
-![image-20220530214320409](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220530214320409.png)	
+![image-20220530214320409](./img/图集HTTP笔记.assets/image-20220530214320409.png)	
 
-![image-20220530214336582](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220530214336582.png)	
+![image-20220530214336582](./img/图集HTTP笔记.assets/image-20220530214336582.png)	
 
 PUT：传输文件
 
-![image-20220530214406072](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220530214406072.png)	
+![image-20220530214406072](./img/图集HTTP笔记.assets/image-20220530214406072.png)	
 
 HEAD：获取报文首部
 
@@ -184,21 +184,21 @@ HEAD方法和GET方法的区别在于不返回报文的主体部分，用于确�
 
 DELETE：删除文件
 
-<img src="C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220530214703809.png" alt="image-20220530214703809"  />	
+<img src="./img/图集HTTP笔记.assets/image-20220530214703809.png" alt="image-20220530214703809"  />	
 
 OPTIONS：询问支持
 
-![image-20220530214737632](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220530214737632.png)	
+![image-20220530214737632](./img/图集HTTP笔记.assets/image-20220530214737632.png)	
 
 TRACE：追踪路径
 
-![image-20220530214816605](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220530214816605.png)	
+![image-20220530214816605](./img/图集HTTP笔记.assets/image-20220530214816605.png)	
 
 CONNECT：要求用隧道协议链接代理
 
 通过代理服务器把通信内容加密后经网络隧道传输
 
-![image-20220530214941450](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220530214941450.png)	
+![image-20220530214941450](./img/图集HTTP笔记.assets/image-20220530214941450.png)	
 
 ### 2.7 持久连接节省通信量
 
@@ -216,11 +216,11 @@ Cookie技术通过在请求和响应报文中写入Cookie信息来控制客户�
 
 服务器发现客户端发送的Cookie后会对比服务器上的记录，得到之前的状态信息
 
-![image-20220530220550805](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220530220550805.png)	
+![image-20220530220550805](./img/图集HTTP笔记.assets/image-20220530220550805.png)	
 
-![image-20220530220602402](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220530220602402.png)	
+![image-20220530220602402](./img/图集HTTP笔记.assets/image-20220530220602402.png)	
 
-![image-20220530220734131](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220530220734131.png)	
+![image-20220530220734131](./img/图集HTTP笔记.assets/image-20220530220734131.png)	
 
 
 
@@ -230,11 +230,11 @@ Cookie技术通过在请求和响应报文中写入Cookie信息来控制客户�
 
 HTTP报文结构如下
 
-![image-20220601083458070](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220601083458070.png)	
+![image-20220601083458070](./img/图集HTTP笔记.assets/image-20220601083458070.png)	
 
 请求报文和响应报文的结构如下
 
-![image-20220601083542688](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220601083542688.png)
+![image-20220601083542688](./img/图集HTTP笔记.assets/image-20220601083542688.png)
 
 ### 3.3 编码 提升传输速率
 
@@ -257,7 +257,7 @@ HTTP报文结构如下
 
   在HTTP通信中，请求的编码实体资源在尚未传输完成时，页面是无法显示的，所以在传输大容量数据时，一般将编码实体资源进行分块，这样传输过程中可以让浏览器逐步显示页面，这种技术叫**分块传输编码**（Chunked Transfer Coding）
 
-  ![image-20220601090527855](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220601090527855.png)
+  ![image-20220601090527855](./img/图集HTTP笔记.assets/image-20220601090527855.png)
 
   其中每一块都会由一个16进制数来标记块的大小，最后一块会使用“0（CR+LF）”来标记
 
@@ -278,11 +278,11 @@ HTTP 协议采用了类似**MIME机制**（Multipurpose Internet Mail Extensions
 
 从中断处继续下载，就要像服务器请求从中断处开始的范围内容，即**范围请求**（Range Request），对一份10 000字节大小的资源可以只请求 5001~10 000字节内的资源
 
-![image-20220601151244206](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220601151244206.png)	
+![image-20220601151244206](./img/图集HTTP笔记.assets/image-20220601151244206.png)	
 
 byte范围的指定形式如下
 
-![image-20220601151351231](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220601151351231.png)
+![image-20220601151351231](./img/图集HTTP笔记.assets/image-20220601151351231.png)
 
 针对范围请求，响应会返回状态码 206 Partial Content，如果是多重范围请求则会在 Content-Type 标明 multipart/byteranges
 
@@ -320,42 +320,42 @@ byte范围的指定形式如下
 
 状态码是服务器端响应时得请求结果
 
-![image-20220606104624138](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220606104624138.png)	
+![image-20220606104624138](./img/图集HTTP笔记.assets/image-20220606104624138.png)	
 
 状态码类别
 
-![image-20220606104655840](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220606104655840.png)	
+![image-20220606104655840](./img/图集HTTP笔记.assets/image-20220606104655840.png)	
 
 遵守以上定义，可以**自定义状态码**
 
 ### 4.2 2XX 成功状态码
 
-- 200 OK：表示客户端发来得请求在服务器端被正常处理了![image-20220606105057239](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220606105057239.png)
+- 200 OK：表示客户端发来得请求在服务器端被正常处理了![image-20220606105057239](./img/图集HTTP笔记.assets/image-20220606105057239.png)
 
 - 204 No Content：表示请求已正确处理，但响应报文中不包含实体得主体部分
-  ![image-20220606105104983](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220606105104983.png)
+  ![image-20220606105104983](./img/图集HTTP笔记.assets/image-20220606105104983.png)
 
 - 206 Partial Content：表示对范围请求的正确处理
 
-  ![image-20220606105213896](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220606105213896.png)			
+  ![image-20220606105213896](./img/图集HTTP笔记.assets/image-20220606105213896.png)			
 
 ### 4.3 3XX 重定向状态码
 
 - 301 Moved Permanently：永久重定向，表示请求的资源已被分配了新的URI
 
-  ![image-20220606105546497](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220606105546497.png)	
+  ![image-20220606105546497](./img/图集HTTP笔记.assets/image-20220606105546497.png)	
 
 - 302 Found：临时性重定向，表示请求的资源已被分配了新的URI，希望用户能够使用新的URI访问
 
-  ![image-20220606105657052](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220606105657052.png)	
+  ![image-20220606105657052](./img/图集HTTP笔记.assets/image-20220606105657052.png)	
 
 - 303 See Other：表示由于请求的资源存在着另一个 URI，应使用 GET 方法定向获取请求的资源，与302的区别在于指明采用 GET 方法
 
-  ![image-20220606105946593](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220606105946593.png)	
+  ![image-20220606105946593](./img/图集HTTP笔记.assets/image-20220606105946593.png)	
 
 - 304 Not Modified：表示当客户端发送附带条件的请求时，服务器允许访问资源，但未满足条件
 
-  ![image-20220606153105058](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220606153105058.png)	
+  ![image-20220606153105058](./img/图集HTTP笔记.assets/image-20220606153105058.png)	
 
 - 307 Temporary Redirect：临时重定向
 
@@ -365,7 +365,7 @@ byte范围的指定形式如下
 
 - 401 Unauthorized：请求 HTTP 验证
 
-  ![image-20220606153504993](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220606153504993.png)	
+  ![image-20220606153504993](./img/图集HTTP笔记.assets/image-20220606153504993.png)	
 
 - 403 Forbidden：请求资源的访问被服务器拒绝
 
@@ -386,11 +386,11 @@ byte范围的指定形式如下
 
 HTTP/1.1 规范允许一台 HTTP 服务器搭建多个 Web 站点，只要使用**虚拟主机**的功能
 
-![image-20220607101723849](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220607101723849.png)	
+![image-20220607101723849](./img/图集HTTP笔记.assets/image-20220607101723849.png)	
 
 如果一台服务器内托管了多个域名，当收到请求时就需要弄清究竟要访问那个域名，发送 HTTP 请求时，必须在 **Host 首部**内完整指定主机名或域名的 URI
 
-![image-20220607102537456](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220607102537456.png)	
+![image-20220607102537456](./img/图集HTTP笔记.assets/image-20220607102537456.png)	
 
 ### 5.2 通信数据转发程序：代理、网关、隧道
 
@@ -400,7 +400,7 @@ HTTP/1.1 规范允许一台 HTTP 服务器搭建多个 Web 站点，只要使用
 
   代理是一种有转发功能的应用程序，它扮演了位于服务器和客户端之间的“中间人”角色，接收由客户端发送的请求并转发给服务器，同时也接收服务器返回的响应并转发给客户端
 
-  ![image-20220607150540596](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220607150540596.png)	
+  ![image-20220607150540596](./img/图集HTTP笔记.assets/image-20220607150540596.png)	
 
   在 HTTP 通信过程中，可级联多台代理服务器，转发时需要附加 Via 首部字段以标记出经过的代理服务器信息
 
@@ -413,7 +413,7 @@ HTTP/1.1 规范允许一台 HTTP 服务器搭建多个 Web 站点，只要使用
 
   网关的机制和代理相似，而网关能使通信线路上的服务器提供非 HTTP 服务
 
-  ![image-20220607153136712](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220607153136712.png)	
+  ![image-20220607153136712](./img/图集HTTP笔记.assets/image-20220607153136712.png)	
 
   利用网关可以提高通信的安全性
 
@@ -425,23 +425,23 @@ HTTP/1.1 规范允许一台 HTTP 服务器搭建多个 Web 站点，只要使用
 
   隧道的目的是确保客户端与服务器，使用 SSL 等加密手段进行通信，隧道本身不会去解析 HTTP 请求
 
-  ![image-20220607154559474](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220607154559474.png)
+  ![image-20220607154559474](./img/图集HTTP笔记.assets/image-20220607154559474.png)
 
 ### 5.3 保存资源的缓存
 
 缓存指代理服务器保存的资源副本
 
-![image-20220607161416653](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220607161416653.png)	
+![image-20220607161416653](./img/图集HTTP笔记.assets/image-20220607161416653.png)	
 
 - 缓存的有效期限
 
-  ![image-20220607162623180](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220607162623180.png)	
+  ![image-20220607162623180](./img/图集HTTP笔记.assets/image-20220607162623180.png)	
 
 - 客户端的缓存
 
   客户端也可以有缓存，称为临时网络文件，一样会过期
 
-  ![image-20220607162710737](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220607162710737.png)	
+  ![image-20220607162710737](./img/图集HTTP笔记.assets/image-20220607162710737.png)	
 
   
 
@@ -453,11 +453,11 @@ HTTP/1.1 规范允许一台 HTTP 服务器搭建多个 Web 站点，只要使用
 
 HTTP 报文得结构为
 
-![image-20220613160632816](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220613160632816.png)	
+![image-20220613160632816](./img/图集HTTP笔记.assets/image-20220613160632816.png)	
 
 报文首部又分为
 
-![image-20220613161119615](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220613161119615.png)	
+![image-20220613161119615](./img/图集HTTP笔记.assets/image-20220613161119615.png)	
 
 ### 6.2 HTTP 首部字段
 
@@ -465,7 +465,7 @@ HTTP 报文得结构为
 
 - HTTP 首部字段格式
 
-  ![image-20220613161217832](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220613161217832.png)
+  ![image-20220613161217832](./img/图集HTTP笔记.assets/image-20220613161217832.png)
 
 - 4 种 HTTP 首部字段类型
 
@@ -478,47 +478,47 @@ HTTP 报文得结构为
 
 - 首部字段一览
 
-  <img src="C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220613161446751.png" alt="image-20220613161446751" style="zoom:80%;" />	
+  <img src="./img/图集HTTP笔记.assets/image-20220613161446751.png" alt="image-20220613161446751" style="zoom:80%;" />	
 
-  <img src="C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220613161503789.png" alt="image-20220613161503789" style="zoom:80%;" />
+  <img src="./img/图集HTTP笔记.assets/image-20220613161503789.png" alt="image-20220613161503789" style="zoom:80%;" />
 
-  <img src="C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220613161528167.png" alt="image-20220613161528167" style="zoom:80%;" />
+  <img src="./img/图集HTTP笔记.assets/image-20220613161528167.png" alt="image-20220613161528167" style="zoom:80%;" />
 
 ### 6.7 为 Cookie 服务的首部字段
 
-<img src="C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220613162803226.png" alt="image-20220613162803226" style="zoom:80%;" />
+<img src="./img/图集HTTP笔记.assets/image-20220613162803226.png" alt="image-20220613162803226" style="zoom:80%;" />
 
 - Set-Cookie
 
-  格式为：![image-20220613162851171](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220613162851171.png)
+  格式为：![image-20220613162851171](./img/图集HTTP笔记.assets/image-20220613162851171.png)
 
   各字段值：
 
-  ![image-20220613162920590](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220613162920590.png)
+  ![image-20220613162920590](./img/图集HTTP笔记.assets/image-20220613162920590.png)
 
 - Cookie
 
   首部字段 Cookie 会告知服务器，当客户端想获得 HTTP 状态管理支持时，就会在请求中包含从服务器接收到 Cookie。
 
-  ![image-20220613163248334](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220613163248334.png)
+  ![image-20220613163248334](./img/图集HTTP笔记.assets/image-20220613163248334.png)
 
 ### 6.8 其他首部字段
 
 - X-Frame-Options
 
-  ![image-20220613163630941](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220613163630941.png)
+  ![image-20220613163630941](./img/图集HTTP笔记.assets/image-20220613163630941.png)
 
 - X-XSS-Protection
 
-  ![image-20220613163715233](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220613163715233.png)
+  ![image-20220613163715233](./img/图集HTTP笔记.assets/image-20220613163715233.png)
 
 - DNT
 
-  ![image-20220613163753679](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220613163753679.png)
+  ![image-20220613163753679](./img/图集HTTP笔记.assets/image-20220613163753679.png)
 
 - P3P
 
-  ![image-20220613163853802](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\图集HTTP笔记.assets\image-20220613163853802.png)
+  ![image-20220613163853802](./img/图集HTTP笔记.assets/image-20220613163853802.png)
 
 
 

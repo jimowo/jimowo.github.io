@@ -84,7 +84,7 @@ service方法每次访问都会调用
 
 ### 2.4 Servlet的继承体系
 
-![image-20220829160037207](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\JavaWeb笔记.assets\image-20220829160037207.png)
+![image-20220829160037207](./img/JavaWeb笔记.assets/image-20220829160037207.png)
 
 ### 2.5 ServletConfig类
 
@@ -217,7 +217,7 @@ filter过滤器也是个接口，作用是**拦截请求、过滤响应**
 
 要求：Web工程下，有一个admin目录。这个目录下的资源必须是用户登录后才允许访问
 
-![image-20220902165619031](C:\Users\12524\Documents\BaiduNetdiskWorkspace\Java\JavaWeb笔记.assets\image-20220902165619031.png)
+![image-20220902165619031](./img/JavaWeb笔记.assets/image-20220902165619031.png)
 
 **Filter使用步骤**
 
