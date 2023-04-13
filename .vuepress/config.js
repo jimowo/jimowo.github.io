@@ -9,7 +9,7 @@ export default defineUserConfig({
     lang: 'zh-CN',
     title: book.title,
     description: book.description,
-    base: '/gitbook-design-patterns-in-jquery/',
+    base: '/',
     head: [],
     theme: defaultTheme({
         docsBranch: 'main',
