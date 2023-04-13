@@ -1,7 +1,7 @@
 {
     "name": "gitbook-design-patterns-in-jquery",
     "version": "1.0.0",
-    "description": "从 jQuery 里学习设计模式",
+    "description": "ymk-blog",
     "scripts": {
         "dev": "vuepress dev",
         "build": "vuepress build"
