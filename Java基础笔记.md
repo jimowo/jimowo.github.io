@@ -5623,9 +5623,9 @@ num = 5;  // 修改num，引起报错
    
    Collection下有3个子接口：Set、List、Queue
    
-   ![Collection](/Collection.png)
+   ![Collection](./img/Java基础笔记.assets/Collection.png)
    
-   ![Map](/Map.png)
+   ![Map](./img/Java基础笔记.assets/Map.png)
 
 6. **ArrayList 和 LinkedList 的区别**
 
