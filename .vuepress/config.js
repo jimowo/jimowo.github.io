@@ -14,7 +14,7 @@ export default defineUserConfig({
     theme: defaultTheme({
         docsBranch: 'main',
         navbar: [{
-                text: 'Github',
+                text: '个人仓库',
                 link: 'https://github.com/jimowo',
             },
             {
