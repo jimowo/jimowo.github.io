@@ -1502,3 +1502,221 @@ class Solution {
 }
 ```
 
+### 226 反转二叉树
+
+给你一棵二叉树的根节点 root ，翻转这棵二叉树，并返回其根节点。
+
+ 
+
+示例 1：
+
+![img](https://assets.leetcode.com/uploads/2021/03/14/invert1-tree.jpg)
+
+输入：root = [4,2,7,1,3,6,9]
+输出：[4,7,2,9,6,3,1]
+示例 2：
+
+![img](https://assets.leetcode.com/uploads/2021/03/14/invert2-tree.jpg)
+
+输入：root = [2,1,3]
+输出：[2,3,1]
+示例 3：
+
+输入：root = []
+输出：[]
+
+**方法：**就是遍历二叉树 然后把节点的左右子节点对调
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public TreeNode invertTree(TreeNode root) {
+        if (root != null) {
+            preorderTraversal(root);
+        }
+        return root;
+    }
+
+    // 前序遍历
+    private void preorderTraversal(TreeNode node) {
+        // 操作(把节点的左子节点和右子节点对调)
+        // 左右子节点都不存在则不操作
+        if (node.left == null && node.right == null) {
+            return;
+        } else {
+            TreeNode temp;
+            temp = node.left;
+            node.left = node.right;
+            node.right = temp;
+        }
+        // 遍历
+        if (node.left != null) {
+            preorderTraversal(node.left);
+        }
+        if (node.right != null) {
+            preorderTraversal(node.right);
+        }
+
+    }
+}
+```
+
+### 101 对称二叉树
+
+给你一个二叉树的根节点 `root` ， 检查它是否轴对称。
+
+示例 1：![img](https://assets.leetcode.com/uploads/2021/02/19/symtree1.jpg)
+
+输入：root = [1,2,2,3,4,4,3]
+输出：true
+示例 2：![img](https://assets.leetcode.com/uploads/2021/02/19/symtree2.jpg)
+
+
+输入：root = [1,2,2,null,3,null,3]
+输出：false
+
+**方法：**左子树和右子树分别从左和右前序遍历
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    public boolean isSymmetric(TreeNode root) {
+        if (root != null) {
+            return preorderTraversal(root.left, root.right);
+        }
+        return true;
+    }
+
+    // 前序遍历
+    private boolean preorderTraversal(TreeNode left, TreeNode right) {
+        if (left == null && right != null) {
+            return false;
+        } else if (left != null && right == null) {
+            return false;
+        } else if (left == null && right == null) {
+            return true;
+        } else if (left.val != right.val) {
+            return false;
+        }
+        // 遍历
+        boolean outside =  preorderTraversal(left.left, right.right);
+        boolean inside =  preorderTraversal(left.right, right.left);
+        return inside && outside;
+    }
+}
+```
+
+104 二叉树的最大深度
+
+给定一个二叉树，找出其最大深度。
+
+二叉树的深度为根节点到最远叶子节点的最长路径上的节点数。
+
+说明: 叶子节点是指没有子节点的节点。
+
+示例：
+给定二叉树 [3,9,20,null,null,15,7]，
+
+    	3
+       / \
+      9  20
+        /  \
+       15   7
+    返回它的最大深度 3 。
+**方法1：**使用深度优先遍历
+
+```java
+class Solution {
+    public int maxDepth(TreeNode root) {
+        return getDepth(root);
+    }
+
+    int getDepth(TreeNode node) {
+        if (node == null) {
+            return 0;
+        }
+
+        int leftDepth = getDepth(node.left);
+        int rightDepth = getDepth(node.right);
+        int depth = 1 + (leftDepth > rightDepth ? leftDepth : rightDepth);
+        return depth;
+    }
+}
+```
+
+**方法2：**层序遍历 层数即深度
+
+```java
+class Solution {
+
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        // 队列存储node节点
+        Queue<TreeNode> queue= new LinkedList<>();
+        // 遍历指针指向根节点
+        TreeNode cur = root;
+        // 临时节点
+        TreeNode temp;
+        // 当前队列的大小，每一次的重新赋值获得的都是一层的大小
+        int size = 0;
+        // 深度
+        int depth = 0;
+        // 先把头节点加入队列
+        if (cur != null) {
+            queue.offer(cur);
+        }
+        // 从第一层开始遍历
+        // size 表示本层元素的大小
+        while (!queue.isEmpty()) {
+            size = queue.size();
+            // 存储当前层的节点值
+            List<Integer> list = new ArrayList();
+            // size遍历完即一层的节点已经遍历完，此时的队列中已经包含下一层的节点
+            while (size-- > 0) {
+                // 取出节点
+                temp = queue.poll();
+                list.add(temp.val);
+                // 把节点的左右都存入队列
+                if (temp.left != null) {
+                    queue.offer(temp.left);
+                }
+                if (temp.right != null) {
+                    queue.offer(temp.right);
+                }
+            }
+            // 一层遍历完，深度+1
+            depth++;
+        }
+        return depth;
+    }
+}
+```
+
