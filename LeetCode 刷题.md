@@ -1748,3 +1748,94 @@ void backtracking(参数) {
     }
 }
 ```
+
+## 7 动态规划
+
+### 模板
+
+**动态规划问题五步曲**
+
+1. 确定dp数组（dp table）以及下标的含义
+2. 确定递推公式
+3. dp数组如何初始化
+4. 确定遍历顺序
+5. 举例推导dp数组
+
+### 509 斐波那契数
+
+斐波那契数 （通常用 F(n) 表示）形成的序列称为 斐波那契数列 。该数列由 0 和 1 开始，后面的每一项数字都是前面两项数字的和。也就是：
+
+F(0) = 0，F(1) = 1
+F(n) = F(n - 1) + F(n - 2)，其中 n > 1
+给定 n ，请计算 F(n) 。
+
+**方法：**优化dp数组，只保留F(n - 1) + F(n - 2)的值，不需要保存for循环计算的所有值，省空间O(1)
+
+状态转移式如上所示
+
+```java
+class Solution {
+    public int fib(int n) {
+        if (n < 1) {
+            return n;
+        }
+        // 初始化DP
+        int[] dpTable = new int[2];
+        dpTable[0] = 0;
+        dpTable[1] = 1;
+        int sum = 0;
+        // 状态转移
+        if (n > 1) {
+            for (int i = 2; i <= n; i++) {
+                sum = dpTable[0] + dpTable[1];
+                dpTable[0] = dpTable[1];
+                dpTable[1] = sum;
+            }
+        }  
+        return dpTable[1];
+    }
+}
+```
+
+### 62 不同路径
+
+一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为 “Start” ）。
+
+机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为 “Finish” ）。
+
+问总共有多少条不同的路径？
+
+![img](https://assets.leetcode.com/uploads/2018/10/22/robot_maze.png)
+
+```java
+class Solution {
+    public int uniquePaths(int m, int n) {
+        // dp数组
+        int[][] dpTable = new int[m][n];
+        int temp1 = 0;
+        int temp2 = 0;
+        // 按行遍历
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                // 边上的格子缺少 会数组越界
+                if (i == 0 && j == 0) {
+                    temp1 = 0;
+                    temp2 = 1;
+                } else if (i == 0 && j != 0) {
+                    temp1 = 0;
+                    temp2 = dpTable[i][j - 1];
+                } else if (i != 0 && j == 0) {
+                    temp1 = dpTable[i - 1][j];
+                    temp2 = 0;
+                } else {
+                    temp1 = dpTable[i][j - 1];
+                    temp2 = dpTable[i - 1][j];
+                }
+                dpTable[i][j] = temp1 + temp2;
+            }
+        }
+        return dpTable[m - 1][n - 1];
+    }
+}
+```
+
