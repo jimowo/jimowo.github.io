@@ -1737,14 +1737,110 @@ class Solution {
 ```text
 void backtracking(参数) {
     if (终止条件) {
-        存放结果;
-        return;
+        result.add(路径)
+        return
     }
 
     for (选择：本层集合中元素（树中节点孩子的数量就是集合的大小）) {
         处理节点;
         backtracking(路径，选择列表); // 递归
         回溯，撤销处理结果
+    }
+}
+```
+
+### 77 组合问题
+
+给定两个整数 `n` 和 `k`，返回范围 `[1, n]` 中所有可能的 `k` 个数的组合。
+
+你可以按 **任何顺序** 返回答案。
+
+```java
+class Solution {
+
+    private List<List<Integer>> result = new ArrayList<>();
+
+    private LinkedList<Integer> path = new LinkedList<>();
+
+    public List<List<Integer>> combine(int n, int k) {
+        backTrack(n, k, 1);
+        return result;
+    }
+
+    // n 表示宽度
+    // k 表示递归的深度
+    // startIndex来记录下一层递归，搜索的起始位置
+    void backTrack(int n, int k, int startIndex) {
+        if (path.size() == k) {
+            result.add(new ArrayList(path));
+            return;
+        }
+        for (int i = startIndex; i <= n; i++) {
+            // 做选择
+            path.add(i);
+            // 递归下一层
+            backTrack(n, k, i + 1);
+            // 撤销选择
+            path.removeLast();
+        }
+     }
+}
+```
+
+### 17 电话号码的字母组合
+
+给定一个仅包含数字 2-9 的字符串，返回所有它能表示的字母组合。答案可以按 任意顺序 返回。
+
+给出数字到字母的映射如下（与电话按键相同）。注意 1 不对应任何字母。
+
+示例 1：
+
+输入：digits = "23"
+输出：["ad","ae","af","bd","be","bf","cd","ce","cf"]
+示例 2：
+
+输入：digits = ""
+输出：[]
+示例 3：
+
+输入：digits = "2"
+输出：["a","b","c"]
+
+**方法：**回溯算法框架 这题的宽度为两层需要两层for 深度为输入字符串的长度
+
+```java
+class Solution {
+
+    String[] ABC = new String[] {"", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv","wxyz"};
+
+    List<String> res = new ArrayList();
+
+    public List<String> letterCombinations(String digits) {
+        if (digits.isEmpty()) {
+            return res;
+        }
+        backtrack(digits, 0, new StringBuilder());
+        return res;
+    }
+
+    void backtrack(String digits,int start, StringBuilder sb) {
+        // 判断是否到达底部
+        if (sb.length() == digits.length()) {
+            res.add(sb.toString());
+            return;
+        }
+        //
+        for (int i = start; i < digits.length(); i++) {
+            int digit = digits.charAt(i) - '0';
+            for (char c : ABC[digit].toCharArray()) {
+                // 做选择
+                sb.append(c);
+                // 递归
+                backtrack(digits, i + 1, sb);
+                // 撤销选择
+                sb.deleteCharAt(sb.length() - 1);
+            }
+        }
     }
 }
 ```
