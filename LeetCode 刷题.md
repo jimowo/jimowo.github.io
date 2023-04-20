@@ -1770,7 +1770,10 @@ class Solution {
     // n 表示宽度
     // k 表示递归的深度
     // startIndex来记录下一层递归，搜索的起始位置
-    void backTrack(int n, int k, int startIndex) {
+    // 【剪枝优化】 当列表中剩余的元素数小于列表需要的元素数时 说明已经不需要向后递归了
+    // k - path.size() 表示剩余需要的元素数
+    // n - i + 1 表示表中剩余元素数
+    for (int i = startIndex; i <= n - (k - path.size()) + 1; i++) {
         if (path.size() == k) {
             result.add(new ArrayList(path));
             return;
@@ -1844,6 +1847,12 @@ class Solution {
     }
 }
 ```
+
+### 46 全排列
+
+给定一个不含重复数字的数组 `nums` ，返回其 *所有可能的全排列* 。你可以 **按任意顺序** 返回答案
+
+**方法：**
 
 ## 7 动态规划
 
