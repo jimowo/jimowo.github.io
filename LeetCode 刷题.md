@@ -1720,6 +1720,98 @@ class Solution {
 }
 ```
 
+## 技巧 差分数组
+
+假设你有⼀个⻓度为 n 的数组，初始情况下所有的数字均为 0，你将会被给出 k 个更新的操作。 其中，每个操作会被表示为⼀个三元组：[startIndex, endIndex, inc]，你需要将⼦数组 A[startIndex ... endIndex]（包括 startIndex 和 endIndex）增加 inc。 请你返回 k 次操作后的数组。
+**注意：数组的索引可能跟题目给的序号不一致 要减一**
+
+### 1094 拼车
+
+车上最初有 capacity 个空座位。车 只能 向一个方向行驶（也就是说，不允许掉头或改变方向）
+
+给定整数 capacity 和一个数组 trips ,  trip[i] = [numPassengersi, fromi, toi] 表示第 i 次旅行有 numPassengersi 乘客，接他们和放他们的位置分别是 fromi 和 toi 。这些位置是从汽车的初始位置向东的公里数。
+
+当且仅当你可以在所有给定的行程中接送所有乘客时，返回 true，否则请返回 false。
+
+示例 1：
+
+输入：trips = [[2,1,5],[3,3,7]], capacity = 4
+输出：false
+
+**方法：**差分数组法 把问题等效于每个时间段的总乘客数相加（这样就把问题转换为了数组操作） 而后判断是否有某个时间段的人数超过座位数
+
+```java
+class Solution {
+    public boolean carPooling(int[][] trips, int capacity) {
+        // 最多有1000个车站
+        int[] nums = new int[1001];
+        // 构造差分解法
+        Difference df = new Difference(nums);
+
+        for (int[] trip : trips) {
+            // 乘客数量
+            int val = trip[0];
+            // 第 trip[1] 站上车
+            int i = trip[1];
+            // 第 trip[2] 站下车
+            int j = trip[2] - 1;    // 呆在车上的区间为[trip[1], trip[2] - 1]
+            // 区间化操作
+            df.increment(i, j, val);
+        }
+
+        int[] res = df.result();
+
+        // 判断是否超载
+        for (int i = 0; i < res.length; i++) {
+            if (capacity < res[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // 差分数组⼯具类
+    class Difference {
+        // 差分数组
+        private int[] diff;
+
+        /* 输⼊⼀个初始数组，区间操作将在这个数组上进⾏ */
+        public Difference(int[] nums) {
+            assert nums.length > 0;
+            diff = new int[nums.length];
+            // 根据初始数组构造差分数组
+            diff[0] = nums[0];
+            for (int i = 1; i < nums.length; i++) {
+                diff[i] = nums[i] - nums[i - 1];
+            }
+        }
+
+        /* 给闭区间 [i,j] 增加 val（可以是负数）*/
+        public void increment(int i, int j, int val) {
+            diff[i] += val;
+            if (j + 1 < diff.length) {
+                diff[j + 1] -= val;
+            }
+        }
+
+        /* 返回结果数组 */
+        public int[] result() {
+            int[] res = new int[diff.length];
+            // 根据差分数组构造结果数组
+            res[0] = diff[0];
+            for (int i = 1; i < diff.length; i++) {
+                res[i] = res[i - 1] + diff[i];
+            }
+            return res;
+        }
+    }
+
+    public static void main(String[] args) {
+        
+    }
+}
+```
+
 ## 6 回溯算法
 
 ### 理论
@@ -1770,15 +1862,15 @@ class Solution {
     // n 表示宽度
     // k 表示递归的深度
     // startIndex来记录下一层递归，搜索的起始位置
-    // 【剪枝优化】 当列表中剩余的元素数小于列表需要的元素数时 说明已经不需要向后递归了
-    // k - path.size() 表示剩余需要的元素数
-    // n - i + 1 表示表中剩余元素数
-    for (int i = startIndex; i <= n - (k - path.size()) + 1; i++) {
+    void backTrack(int n, int k, int startIndex) {
         if (path.size() == k) {
             result.add(new ArrayList(path));
             return;
         }
-        for (int i = startIndex; i <= n; i++) {
+        // 【剪枝优化】 当列表中剩余的元素数小于列表需要的元素数时 说明已经不需要向后递归了
+        // k - path.size() 表示剩余需要的元素数
+        // n - i + 1 表示表中剩余元素数
+        for (int i = startIndex; i <= n - (k - path.size()) + 1; i++) {
             // 做选择
             path.add(i);
             // 递归下一层
@@ -1852,7 +1944,177 @@ class Solution {
 
 给定一个不含重复数字的数组 `nums` ，返回其 *所有可能的全排列* 。你可以 **按任意顺序** 返回答案
 
+**方法：**全排列问题因为有顺序的原因所以for循环遍历都是从0开始 判断path中是否已经有当前数来判断是否已经排列过这个数
+
+```java
+class Solution {
+    List<List<Integer>> result = new ArrayList<>();
+    LinkedList<Integer> path = new LinkedList<>();
+    public List<List<Integer>> permute(int[] nums) {
+        if (nums.length == 0) return result;
+        backtrack(nums);
+        return result;
+    }
+    public void backtrack(int[] nums) {
+        if (path.size() == nums.length) {
+            result.add(new ArrayList<>(path));
+        }
+        for (int i =0; i < nums.length; i++) {
+            // 如果path中已有，则跳过
+            if (path.contains(nums[i])) {
+                continue;
+            } 
+            path.add(nums[i]);
+            backtrack(nums);
+            path.removeLast();
+        }
+    }
+}
+```
+
+### 78 子集
+
+给你一个整数数组 `nums` ，数组中的元素 **互不相同** 。返回该数组所有可能的子集（幂集）。
+
+解集 **不能** 包含重复的子集。你可以按 **任意顺序** 返回解集。
+
+**示例 1：**
+
+```
+输入：nums = [1,2,3]
+输出：[[],[1],[2],[1,2],[3],[1,3],[2,3],[1,2,3]]
+```
+
+**方法：**子集问题看成深度在变化的组合问题
+
+多个组合问题 深度在变化 = [0, nums.length]
+
+```java
+class Solution {
+
+    List<List<Integer>> res = new ArrayList();
+
+    LinkedList<Integer> path = new LinkedList();
+
+    public List<List<Integer>> subsets(int[] nums) {
+        // 多个组合问题 深度在变化 = [0, nums.length]
+        for (int i = 0; i <= nums.length; i++) {
+            backtrack(nums, i, 0);
+        }
+        return res;
+    }
+
+    void backtrack(int[] nums, int depth, int startIndex) {
+        // 终止条件
+        if (path.size() == depth) {
+            res.add(new ArrayList(path));
+            return;
+        }
+        for (int i = startIndex; i < nums.length - (depth - path.size()) + 1; i++) {
+            // 选择
+            path.add(nums[i]);
+            // 递归
+            backtrack(nums, depth, i + 1);
+            // 撤销选择
+            path.removeLast();
+        }
+    }
+}
+```
+
+**方法2：**遍历一颗回溯树，但是不设终止条件 保存全部的路径
+
+```java
+class Solution {
+
+    List<List<Integer>> res = new ArrayList();
+
+    LinkedList<Integer> path = new LinkedList();
+
+    public List<List<Integer>> subsets(int[] nums) {
+        backtrack(nums, 3, 0);
+        return res;
+    }
+
+    void backtrack(int[] nums, int depth, int startIndex) {
+        res.add(new ArrayList(path));
+        for (int i = startIndex; i < nums.length; i++) {
+            // 选择
+            path.add(nums[i]);
+            // 递归
+            backtrack(nums, depth, i + 1);
+            // 撤销选择
+            path.removeLast();
+        }
+    }
+}
+```
+
+### 131 分割回文串
+
+给你一个字符串 `s`，请你将 `s` 分割成一些子串，使每个子串都是 **回文串** 。返回 `s` 所有可能的分割方案。
+
+**回文串** 是正着读和反着读都一样的字符串。
+
+**示例 1：**
+
+```
+输入：s = "aab"
+输出：[["a","a","b"],["aa","b"]]
+```
+
 **方法：**
+
+```java
+class Solution {
+
+    List<List<String>> res = new ArrayList();
+
+    LinkedList<String> path = new LinkedList();
+
+    public List<List<String>> partition(String s) {
+        if (s == null) {
+            return res;
+        }
+        backtrack(s, 0);
+        return res;
+    }
+
+    // 深度为字符串长度
+    void backtrack(String str, int startIndex) {
+        // 终止条件 startIndex 表示截取的记号
+        if (startIndex >= str.length()) {
+            res.add(new ArrayList(path));
+            return;
+        }
+        for (int i = startIndex; i < str.length(); i++) {
+            // 选择
+            if (isPalindrome(str, startIndex, i)) {
+                String temp = str.substring(startIndex, i + 1);
+                path.add(temp);
+            } else {
+                continue;
+            }
+            // 递归
+            backtrack(str, i + 1);
+            path.removeLast();
+        }
+    }
+
+    // 判断是否为回文字符串
+    // 字符串反转与原字符串相等即为回文
+    boolean isPalindrome(String str, int start, int end) {
+        for (int i = start, j = end; i < j; i++, j--) {
+            if (str.charAt(i) != str.charAt(j)) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+```
+
+
 
 ## 7 动态规划
 
@@ -1937,6 +2199,71 @@ class Solution {
                     temp2 = dpTable[i - 1][j];
                 }
                 dpTable[i][j] = temp1 + temp2;
+            }
+        }
+        return dpTable[m - 1][n - 1];
+    }
+}
+```
+
+### 63 不同路径2
+
+一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为 “Start” ）。
+
+机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为 “Finish”）。
+
+现在考虑网格中有障碍物。那么从左上角到右下角将会有多少条不同的路径？
+
+网格中的障碍物和空位置分别用 1 和 0 来表示。
+
+示例 1：
+
+![img](https://assets.leetcode.com/uploads/2020/11/04/robot1.jpg)
+
+
+输入：obstacleGrid = [[0,0,0],[0,1,0],[0,0,0]]
+输出：2
+解释：3x3 网格的正中间有一个障碍物。
+从左上角到右下角一共有 2 条不同的路径：
+1. 向右 -> 向右 -> 向下 -> 向下
+2. 向下 -> 向下 -> 向右 -> 向右
+
+**方法：**动态规划二维DP问题
+
+```java
+class Solution {
+    public int uniquePathsWithObstacles(int[][] obstacleGrid) {
+        int m = obstacleGrid.length;    // 行数
+        int n = obstacleGrid[0].length; // 列数
+        // dp数组 数组中每个数代表从起点到对应位置的路径数
+        int[][] dpTable = new int[m][n];
+        // 如果在起点和终点遇到了障碍 直接返回0
+        if (obstacleGrid[0][0] == 1 || obstacleGrid[m - 1][n - 1] == 1) {
+            return 0;
+        }
+        // 本题特点 因为是从左上往右下移动，所以最左一列和最上一行的dp数组值都为1
+        for (int i = 0; i < m; i++) {
+            // 当出现了一个障碍时 后面的都到达不了 直接结束赋值
+            if (obstacleGrid[i][0] == 1) {
+                break;
+            }
+            dpTable[i][0] = 1;
+        }
+        for (int i = 1; i < n; i++) {
+            if (obstacleGrid[0][i] == 1) {
+                break;
+            }
+            dpTable[0][i] = 1;
+        }
+        // 按行遍历 从[1, 1]开始
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                // 障碍物处理
+                if (obstacleGrid[i][j] == 1) {
+                    dpTable[i][j] = 0;
+                } else {
+                    dpTable[i][j] = dpTable[i - 1][j] + dpTable[i][j - 1];
+                }
             }
         }
         return dpTable[m - 1][n - 1];
