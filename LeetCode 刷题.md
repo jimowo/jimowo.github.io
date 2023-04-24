@@ -1812,6 +1812,80 @@ class Solution {
 }
 ```
 
+### 1109 航班预定统计
+
+这里有 n 个航班，它们分别从 1 到 n 进行编号。
+
+有一份航班预订表 bookings ，表中第 i 条预订记录 bookings[i] = [firsti, lasti, seatsi] 意味着在从 firsti 到 lasti （包含 firsti 和 lasti ）的 每个航班 上预订了 seatsi 个座位。
+
+请你返回一个长度为 n 的数组 answer，里面的元素是每个航班预定的座位总数。
+
+示例 1：
+
+输入：bookings = [[1,2,10],[2,3,20],[2,5,25]], n = 5
+输出：[10,55,45,25,25]
+解释：
+航班编号        1   2   3   4   5
+预订记录 1 ：   10  10
+预订记录 2 ：       20  20
+预订记录 3 ：       25  25  25  25
+总座位数：      10  55  45  25  25
+因此，answer = [10,55,45,25,25]
+
+**方法：**完美满足差分数组法 返回计算后的result就行
+
+```java
+class Solution {
+    public int[] corpFlightBookings(int[][] bookings, int n) {
+        // 存结果
+        int[] answer = new int[n];
+        // 初始化差分数组
+        Difference df = new Difference(answer);
+        // 计算
+        for (int i = 0; i < bookings.length; i++) {
+            df.increment(bookings[i][0] - 1, bookings[i][1] - 1, bookings[i][2]);
+        }
+        return df.result();
+    }
+
+    // 差分数组⼯具类
+    class Difference {
+        // 差分数组
+        private int[] diff;
+
+        /* 输⼊⼀个初始数组，区间操作将在这个数组上进⾏ */
+        public Difference(int[] nums) {
+            assert nums.length > 0;
+            diff = new int[nums.length];
+            // 根据初始数组构造差分数组
+            diff[0] = nums[0];
+            for (int i = 1; i < nums.length; i++) {
+                diff[i] = nums[i] - nums[i - 1];
+            }
+        }
+
+        /* 给闭区间 [i,j] 增加 val（可以是负数）*/
+        public void increment(int i, int j, int val) {
+            diff[i] += val;
+            if (j + 1 < diff.length) {
+                diff[j + 1] -= val;
+            }
+        }
+
+        /* 返回结果数组 */
+        public int[] result() {
+            int[] res = new int[diff.length];
+            // 根据差分数组构造结果数组
+            res[0] = diff[0];
+            for (int i = 1; i < diff.length; i++) {
+                res[i] = res[i - 1] + diff[i];
+            }
+            return res;
+        }
+    }
+}
+```
+
 ## 6 回溯算法
 
 ### 理论
@@ -2267,6 +2341,103 @@ class Solution {
             }
         }
         return dpTable[m - 1][n - 1];
+    }
+}
+```
+
+### 198 打家劫舍
+
+如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。
+
+给定一个代表每个房屋存放金额的非负整数数组，计算你 不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额。
+
+示例 1：
+
+输入：[1,2,3,1]
+输出：4
+解释：偷窃 1 号房屋 (金额 = 1) ，然后偷窃 3 号房屋 (金额 = 3)。
+     偷窃到的最高金额 = 1 + 3 = 4 。
+
+**方法：**这是一道一维动态规划题 主要需要确定dp数组的含义 以及递推公式
+
+```java
+class Solution {
+    public int rob(int[] nums) {
+        if (nums.length == 1)  {
+            return nums[0];
+        }
+        // 递推公式
+        // 每次偷当前人家 偷或不偷对应两种情况 da取最大值
+        // max(dp[i - 2] + nums[i], dp[i - 1])
+        // 初始化dp数组
+        // 优化空间 dp数组只用2格空间 只记录与当前计算相关的前两个结果
+        int[] dpTable = new int[2];
+        dpTable[0] = nums[0];
+        dpTable[1] = nums[0] > nums[1] ? nums[0] : nums[1];
+        int res = 0;
+        // 遍历
+        for (int i = 2; i < nums.length; i++) {
+            res = (dpTable[0] + nums[i]) > dpTable[1] ? (dpTable[0] + nums[i]) : dpTable[1];
+            dpTable[0] = dpTable[1];
+            dpTable[1] = res;
+        }
+        // 输出结果
+        return dpTable[1];
+    }
+}
+```
+
+### 213 打家劫舍2
+
+你是一个专业的小偷，计划偷窃沿街的房屋，每间房内都藏有一定的现金。这个地方所有的房屋都 **围成一圈** ，这意味着**第一个房屋和最后一个房屋是紧挨着的**。同时，**相邻的房屋装有相互连通的防盗系统**，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警 。
+
+给定一个代表每个房屋存放金额的非负整数数组，计算你 在不触动警报装置的情况下 ，今晚能够偷窃到的最高金额。
+
+示例 1：
+
+输入：nums = [2,3,2]
+输出：3
+解释：你不能先偷窃 1 号房屋（金额 = 2），然后偷窃 3 号房屋（金额 = 2）, 因为他们是相邻的。
+
+**方法：**打家劫舍1的区别是首尾是相连的 状态转移方程有变化 初始状态也有变化
+
+我们把首尾被抢的情况分为3种
+
+1. 首尾都不抢 此时等效于对[1, n-2]的房屋进行打家劫舍1问题
+2. 首抢尾不抢 此时等效于对[0, n-2]的房屋进行打家劫舍1问题
+3. 首不抢尾抢 此时等效于对[1, n-1]的房屋进行打家劫舍1问题
+
+```java
+class Solution {
+    public int rob(int[] nums) {
+        if (nums.length == 1)  {
+            return nums[0];
+        }
+        // 分成3次基本打家劫舍问题 又由于后两次的范围对于第一次是包含关系 所以可以不考虑第一次
+        int result1 = rob1(nums, 0, nums.length - 2);
+        int result2 = rob1(nums, 1, nums.length - 1);
+        return result1 > result2 ? result1 : result2;
+    }
+
+    // 基本打家劫舍问题算法
+    int rob1(int[] nums, int start, int end) {
+        if (end - start < 0)  {
+            return 0;
+        } else if (end - start == 0) {
+            return nums[start];
+        }
+        int[] dpTable = new int[2];
+        dpTable[0] = nums[start];
+        dpTable[1] = nums[start] > nums[start + 1] ? nums[start] : nums[start + 1];
+        int res = 0;
+        // 遍历
+        for (int i = start + 2; i <= end; i++) {
+            res = (dpTable[0] + nums[i]) > dpTable[1] ? (dpTable[0] + nums[i]) : dpTable[1];
+            dpTable[0] = dpTable[1];
+            dpTable[1] = res;
+        }
+        // 输出结果
+        return dpTable[1];
     }
 }
 ```
