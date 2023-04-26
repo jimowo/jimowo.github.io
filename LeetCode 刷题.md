@@ -2190,6 +2190,88 @@ class Solution {
 }
 ```
 
+### 698 划分相等子集（分割等和子集问题通用解法）
+
+给定⼀个整数数组 nums 和⼀个正整数 k，找出是否有可能把这个数组分成 k 个⾮空⼦集，其总和都相等。 
+
+示例 1： 
+
+输⼊：nums = [4, 3, 2, 3, 5, 2, 1], k = 4 
+
+输出：True 说明：有可能将其分成 4 个⼦集 {5}, {1,4}, {2,3}, {2,3} 等于总和。
+
+```java
+class Solution {
+
+    public boolean canPartition(int[] nums) {
+        if (nums.length < 2) {
+            return false;
+        }
+        // 先判断能否整除2 即能否等分为两个子集
+        int sum = 0;
+        for (int num : nums) {
+            sum += num;
+        }
+        if (sum % 2 != 0) {
+            return false;
+        }
+        //
+        int target = sum / 2;   // 每个子集的和
+        int used = 0; // 使⽤位图技巧
+
+        // k 号桶初始什么都没装，从 nums[0] 开始做选择
+        return backtrack(2, 0, nums, 0, used, target);
+
+    }
+
+    // 下面为分割等和子集通用回溯法
+    HashMap<Integer, Boolean> memo = new HashMap<>();
+
+    boolean backtrack(int k, int bucket,
+                      int[] nums, int start, int used, int target) {
+        // base case
+        if (k == 0) {
+            // 所有桶都被装满了，⽽且 nums ⼀定全部⽤完了
+            return true;
+        }
+        if (bucket == target) {
+            // 装满了当前桶，递归穷举下⼀个桶的选择
+            // 让下⼀个桶从 nums[0] 开始选数字
+            boolean res = backtrack(k - 1, 0, nums, 0, used, target);
+            // 缓存结果
+            memo.put(used, res);
+            return res;
+        }
+
+        if (memo.containsKey(used)) {
+            // 避免冗余计算
+            return memo.get(used);
+        }
+        for (int i = start; i < nums.length; i++) {
+            // 剪枝
+            if (((used >> i) & 1) == 1) { // 判断第 i 位是否是 1
+                // nums[i] 已经被装⼊别的桶中
+                continue;
+            }
+            if (nums[i] + bucket > target) {
+                continue;
+            }
+            // 做选择
+            used |= 1 << i; // 将第 i 位置为 1
+            bucket += nums[i];
+            // 递归穷举下⼀个数字是否装⼊当前桶
+            if (backtrack(k, bucket, nums, i + 1, used, target)) {
+                return true;
+            }
+            // 撤销选择
+            used ^= 1 << i; // 将第 i 位置为 0
+            bucket -= nums[i];
+        }
+        return false;
+    }
+}
+```
+
 
 
 ## 7 动态规划
