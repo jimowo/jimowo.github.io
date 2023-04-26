@@ -126,7 +126,7 @@ class Solution {
 }
 ```
 
-### 209 长度最小的子数组
+### 209 长度最小的子数组（滑动窗口法）
 
 给定一个含有 n 个正整数的数组和一个正整数 s ，找出该数组中满足其和 ≥ s 的长度最小的连续 子数组，并返回其长度。如果不存在符合条件的子数组，返回 0。
 
@@ -2522,6 +2522,183 @@ class Solution {
         }
         // 输出结果
         return dpTable[1];
+    }
+}
+```
+
+### 背包问题模板
+
+```java
+// dp[][]数组的意义
+// dp[i][w]表示对于前i个物品，当前背包承重为w时，可以装下的最大价值
+// 状态转移方程     dp[i][w] = 
+// 如果没有把第i个物品装入背包 = dp[i - 1][w] 即继承之前的结果
+// 如果把第i个物品装入背包    = dp[i-1][w - wt[i - 1]] + val[i - 1] (wt和val数组存的是第i个物品的重量和价值)
+int bagSolution(int w, int n, int[] wt, int[] val) {
+    // 初始化dp数组
+    // 注意：要根据不同题的逻辑来对数组进行初始化
+    int[][] dp = new int[n+1][w+1];
+    for (int i = 0; i < n + 1; i++) {
+        dp[i][0] = 0;
+    }
+    for (int i = 0; i < w + 1; i++) {
+        dp[0][i] = 0;
+    }
+    // 状态转移
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= w; j++) {
+            // 背包容量不够
+        	if (w - wt[i - 1] < 0) {
+           		dp[i][j] = dp[i - 1][j];
+        	} else {
+                // 装入或不装入背包 取最大价值
+                dp[i][j] = Math.max(dp[i - 1][j], dp[i-1][j - wt[i - 1]] + val[i - 1]);
+            }
+        }
+    }
+    // 输出
+    return dp[n][w];
+}
+```
+
+### 416 分割等和子集
+
+给你一个 **只包含正整数** 的 **非空** 数组 `nums` 。请你判断是否可以将这个数组分割成两个子集，使得两个子集的元素和相等。
+
+**示例 1：**
+
+```
+输入：nums = [1,5,11,5]
+输出：true
+解释：数组可以分割成 [1, 5, 5] 和 [11] 。
+```
+
+**方法1：**回溯法暴力搜索 会超时 直接套回溯算法分割等和子集模板
+
+```java
+class Solution {
+
+    public boolean canPartition(int[] nums) {
+        if (nums.length < 2) {
+            return false;
+        }
+        // 先判断能否整除2 即能否等分为两个子集
+        int sum = 0;
+        for (int num : nums) {
+            sum += num;
+        }
+        if (sum % 2 != 0) {
+            return false;
+        }
+        //
+        int target = sum / 2;   // 每个子集的和
+        int used = 0; // 使⽤位图技巧
+
+        // k 号桶初始什么都没装，从 nums[0] 开始做选择
+        return backtrack(2, 0, nums, 0, used, target);
+
+    }
+
+    HashMap<Integer, Boolean> memo = new HashMap<>();
+
+    boolean backtrack(int k, int bucket,
+                      int[] nums, int start, int used, int target) {
+        // base case
+        if (k == 0) {
+            // 所有桶都被装满了，⽽且 nums ⼀定全部⽤完了
+            return true;
+        }
+        if (bucket == target) {
+            // 装满了当前桶，递归穷举下⼀个桶的选择
+            // 让下⼀个桶从 nums[0] 开始选数字
+            boolean res = backtrack(k - 1, 0, nums, 0, used, target);
+            // 缓存结果
+            memo.put(used, res);
+            return res;
+        }
+
+        if (memo.containsKey(used)) {
+            // 避免冗余计算
+            return memo.get(used);
+        }
+        for (int i = start; i < nums.length; i++) {
+            // 剪枝
+            if (((used >> i) & 1) == 1) { // 判断第 i 位是否是 1
+                // nums[i] 已经被装⼊别的桶中
+                continue;
+            }
+            if (nums[i] + bucket > target) {
+                continue;
+            }
+            // 做选择
+            used |= 1 << i; // 将第 i 位置为 1
+            bucket += nums[i];
+            // 递归穷举下⼀个数字是否装⼊当前桶
+            if (backtrack(k, bucket, nums, i + 1, used, target)) {
+                return true;
+            }
+            // 撤销选择
+            used ^= 1 << i; // 将第 i 位置为 0
+            bucket -= nums[i];
+        }
+        return false;
+    }
+}
+```
+
+**方法2：**动态规划 背包问题模板
+
+分成两个子集，把子集看成背包，就相当于双背包问题，装满背包意思就是，每个子集里的数字和正好等于sum/2
+
+**关键是如何套用0-1背包的模板**
+
+先判断能否整除2，即能否等分
+
+再使用0-1背包模板 判断能不能恰好装满一个背包 当一个背包能够装满时 说明剩余的数恰好也能装满另一个背包
+
+所以本题依然可以使用0-1背包问题的模板
+
+```java
+class Solution {
+
+    public boolean canPartition(int[] nums) {
+        if (nums.length < 2) {
+            return false;
+        }
+        // 先判断能否整除2 即能否等分为两个子集
+        int sum = 0;
+        for (int num : nums) {
+            sum += num;
+        }
+        if (sum % 2 != 0) {
+            return false;
+        }
+        // 背包问题参数
+        int n = nums.length;
+        int target = sum / 2;   // 每个子集的和 即每个背包的承重
+        boolean[][] dp = new boolean[n + 1][target + 1];
+        // 初始化dp
+        // 背包没有空间时 相当于装满了 所以赋true
+        // 没有物品可以选择时 无法装满背包 所以赋false
+        for (int i = 0; i <= n; i++) {
+            dp[i][0] = true;
+        }
+        for (int i = 0; i <= target; i++) {
+            dp[0][i] = false;
+        }
+        // 状态转移
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= target; j++) {
+                // 判断背包容量不足时 不装这个数
+                if (j - nums[i - 1] < 0) {
+                    dp[i][j] = dp[i - 1][j];
+                } else {
+                    // 选择装入或不装入背包
+                    dp[i][j] = dp[i - 1][j] || dp[i - 1][j - nums[i - 1]];
+                }
+            }
+        }
+        return dp[n][target];
     }
 }
 ```
