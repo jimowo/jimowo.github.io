@@ -181,8 +181,10 @@ class Solution {
             sum += nums[right];
             // 当窗口之和大于目标时，左边界右移，窗口值减小
             while (sum >= target) {
+                // 输出处理
                 width = right - left + 1;
                 res = res < width ? res : width;
+                // 左边界右移
                 sum -= nums[left++];
             }
         }
