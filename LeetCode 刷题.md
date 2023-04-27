@@ -2871,6 +2871,198 @@ class Solution {
 }
 ```
 
+## 9 图论算法
+
+### 4.26 华为笔试 批量初始化次数
+
+某部门在开发一个代码分析工具，需要分析代码模块之间的赖关系，用来确定模块的初始化顺序、是否有循环依赖等问题，"就量初给化 是指-次可以初始化一个或多个块，例如提块1依赖模块2,模块3也依模块2，但模块1和3没有依赖关系。则必须先"批量初始化”模块2，再“批量初始化“模块1和3。现给定一组模块间的依赖关系，请计算需要“批量初始化"的次数。
+
+输入
+(1)第1行只有一个数字,表示模块总数N。
+
+(2)随后的N行依次表示模块1到N的依赖数据。每行的第1个数据表示赖的模块数量不会超过N，之后的数字表示当前模块依赖的块1序列,该序列不会重复出现相同的数字,模块D的取值一定在1.N之内
+
+(3)模块总数N取值范围1<=N<=1000。
+
+(4)每一行里面的数字按1个空格分隔。
+
+输出
+输出“批量初始化次数”,若有循环依赖无法完成初始化，则输出-1
+
+样例1
+
+```
+输入:
+5
+3 2 3 4
+1 5
+1 5
+1 5
+输出:3
+解释: 共5个模块。模块1依赖模块2、3、4;模块2依赖模块5;模块3依赖模块5;模块4依赖模块5;模块5没有依赖任何模块.批量初始化顺序为 {5)->(2,3,4]->(1]，共需"批量初始化"3次。
+```
+
+样例2
+
+```
+输入:
+3
+1 2
+1 3
+1 1
+输出:-1
+解释:存在循环依赖，无法完成初始化，返回-1
+```
+
+**方法**：图的遍历 先构造图的数据结构`List<LinkedList<Integer>>` 里面的`LinkedList`记录了该Index模块的依赖模块列表，外面的`List`记录的是按顺序的模块列表（图也可表示成`LinkedList<Integer>[]`）
+
+再使用回溯算法遍历
+
+循环依赖通过判断 回溯path中是否有相同的节点 有则代表有循环依赖
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        // 输入处理
+        int n = sc.nextInt();
+        // 图结构
+        List<LinkedList<Integer>> dependency = new ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            LinkedList<Integer> list = new LinkedList<>();
+            int modNum = sc.nextInt();
+            for (int j = 0; j < modNum; j++) {
+                list.add(sc.nextInt());
+            }
+            dependency.add(list);
+        }
+        // 回溯算法
+        for (int i = 0; i < dependency.size(); i++) {
+            backtrack(dependency, i);
+        }
+        // 输出结果
+        System.out.println(maxDepth);
+    }
+
+    static int maxDepth = 0;
+    static LinkedList<Integer> path = new LinkedList<>();
+    static ArrayList<Integer> memo = new ArrayList<>(); // 备忘录 记录每一个模块的依赖深度
+
+    // 什么时候结束 当没有依赖时结束
+    // nums 表示待遍历的图 outIndex 表示模块的序号
+    static void backtrack(List<LinkedList<Integer>> nums, int outIndex) {
+        // 出现循环依赖 直接终止后面的递归
+        if (-1 == maxDepth) {
+            return;
+        }
+        // 遍历到没有依赖的模块 代表结束
+        if (nums.get(outIndex).isEmpty()) {
+            maxDepth = Math.max(maxDepth, path.size() + 1);
+            return;
+        }
+        for (int i = 0; i < nums.get(outIndex).size(); i++) {
+            // 处理
+            int nextMod = nums.get(outIndex).get(i) - 1;
+            if (path.contains(nextMod)) {
+                // path中出现重复的模块说明存在循环依赖 返回值为-1
+                maxDepth = -1;
+                return;
+            } else {
+                path.add(nextMod);
+            }
+            // 递归
+            backtrack(nums, nextMod);
+            // 撤销选择
+            path.removeLast();
+        }
+    }
+}
+```
+
+## 10 数据结构设计
+
+### 146 LRU缓存
+
+请你设计并实现一个满足  LRU (最近最少使用) 缓存 约束的数据结构。
+实现 `LRUCache` 类：
+
+- `LRUCache(int capacity)` 以 正整数 作为容量 `capacity` 初始化 LRU 缓存
+- `int get(int key)` 如果关键字 `key` 存在于缓存中，则返回关键字的值，否则返回 `-1` 。
+- `void put(int key, int value)` 如果关键字 `key` 已经存在，则变更其数据值 `value` ；如果不存在，则向缓存中插入该组 `key-value` 。如果插入操作导致关键字数量超过 `capacity` ，则应该 逐出 最久未使用的关键字。
+
+函数 `get` 和 `put` 必须以 `O(1)` 的平均时间复杂度运行。
+
+```
+输入
+["LRUCache", "put", "put", "get", "put", "get", "put", "get", "get", "get"]
+[[2], [1, 1], [2, 2], [1], [3, 3], [2], [4, 4], [1], [3], [4]]
+输出
+[null, null, null, 1, null, -1, null, -1, 3, 4]
+
+解释
+LRUCache lRUCache = new LRUCache(2);
+lRUCache.put(1, 1); // 缓存是 {1=1}
+lRUCache.put(2, 2); // 缓存是 {1=1, 2=2}
+lRUCache.get(1);    // 返回 1
+lRUCache.put(3, 3); // 该操作会使得关键字 2 作废，缓存是 {1=1, 3=3}
+lRUCache.get(2);    // 返回 -1 (未找到)
+lRUCache.put(4, 4); // 该操作会使得关键字 1 作废，缓存是 {4=4, 3=3}
+lRUCache.get(1);    // 返回 -1 (未找到)
+lRUCache.get(3);    // 返回 3
+lRUCache.get(4);    // 返回 4
+```
+
+**方法**：该题的关键是找一个能满足函数 `get` 和 `put` 必须以 `O(1)` 的平均时间复杂度运行的数据结构
+
+哈希表查找快，但是数据⽆固定顺序；链表有顺序之分，插⼊删除快，但是查找慢，所以结合⼆者的⻓处， 可以形成⼀种新的数据结构：哈希链表 `LinkedHashMap`
+
+```java
+class LRUCache {
+
+    int cap;    // 缓存容量
+    LinkedHashMap<Integer, Integer> cache = new LinkedHashMap();
+
+    public LRUCache(int capacity) {
+        this.cap = capacity;
+    }
+
+    // 删除key 重新插入到队尾 表示它最近使用过
+    private void makeRecently(int key) {
+        int val = cache.get(key);
+        // 删除key 重新插入到队尾 表示它最近使用过
+        cache.remove(key);
+        cache.put(key, val);
+    }
+    
+    public int get(int key) {
+        if (!cache.containsKey(key)) {
+            return -1;
+        }
+        // 将key变为最近使用
+        makeRecently(key);
+        return cache.get(key);
+    }
+    
+    public void put(int key, int value) {
+        if (cache.containsKey(key)) {
+            // 修改原key值
+            cache.put(key, value);
+            // 最近使用
+            makeRecently(key);
+            return;
+        }
+        // 缓存中不存在该key 且缓存已满
+        if (cache.size() >= this.cap) {
+            // 删除头部的key 即最久未用的key
+            int oldestKey = cache.keySet().iterator().next();
+            cache.remove(oldestKey);
+        }
+        // 将新的key添加到链表尾部
+        cache.put(key, value);
+    }
+}
+```
+
 
 
 ## ACM输入输出
