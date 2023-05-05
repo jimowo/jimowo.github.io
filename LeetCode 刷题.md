@@ -2873,6 +2873,71 @@ class Solution {
 
 ## 9 图论算法
 
+### 797 所有可能路径
+
+给你一个有 n 个节点的 有向无环图（DAG），请你找出所有从节点 0 到节点 n-1 的路径并输出（不要求按特定顺序）
+
+ graph[i] 是一个从节点 i 可以访问的所有节点的列表（即从节点 i 到节点 graph[i][j]存在一条有向边）。
+
+![img](https://assets.leetcode.com/uploads/2020/09/28/all_1.jpg)
+
+**方法**：解法很简单，以 0 为起点遍历图，同时记录遍历过的路径，当遍历到终点时将路径记录下来即可。 既然输⼊的图是⽆环的，我们就不需要 visited 数组辅助了，可以直接套用图的遍历框架。
+
+```java
+/* 图的遍历框架 */
+// 回溯
+    void backtrack(int[][] graph, int outIndex) {
+        // 递归结束的判断
+        if (outIndex == graph.length - 1) {
+            res.add(new ArrayList(path));
+            return;
+        }
+        // 跟着图的顺序递归
+        for (int i = 0; i < graph[outIndex].length; i++) {
+            // 处理
+            path.add(graph[outIndex][i]);
+            // 递归
+            backtrack(graph, graph[outIndex][i]);
+            // 撤销
+            path.removeLast();
+        }
+    }
+```
+
+```java
+class Solution {
+
+    List<List<Integer>> res = new ArrayList();
+    LinkedList<Integer> path = new LinkedList();
+
+    public List<List<Integer>> allPathsSourceTarget(int[][] graph) {
+        path.add(0);
+        backtrack(graph, 0);
+        return res;
+    }
+
+    // 回溯
+    void backtrack(int[][] graph, int outIndex) {
+        // 遍历到底结束
+        if (outIndex == graph.length - 1) {
+            res.add(new ArrayList(path));
+            return;
+        }
+        // 
+        for (int i = 0; i < graph[outIndex].length; i++) {
+            // 处理
+            path.add(graph[outIndex][i]);
+            // 递归
+            backtrack(graph, graph[outIndex][i]);
+            // 撤销
+            path.removeLast();
+        }
+    }
+}
+```
+
+
+
 ### 4.26 华为笔试 批量初始化次数
 
 某部门在开发一个代码分析工具，需要分析代码模块之间的赖关系，用来确定模块的初始化顺序、是否有循环依赖等问题，"就量初给化 是指-次可以初始化一个或多个块，例如提块1依赖模块2,模块3也依模块2，但模块1和3没有依赖关系。则必须先"批量初始化”模块2，再“批量初始化“模块1和3。现给定一组模块间的依赖关系，请计算需要“批量初始化"的次数。
