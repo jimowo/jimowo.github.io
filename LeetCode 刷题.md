@@ -3063,6 +3063,72 @@ class LRUCache {
 }
 ```
 
+### 380 O(1)时间插入、删除和获取随机元素
+
+实现RandomizedSet 类：
+
+RandomizedSet() 初始化 RandomizedSet 对象
+bool insert(int val) 当元素 val 不存在时，向集合中插入该项，并返回 true ；否则，返回 false 。
+bool remove(int val) 当元素 val 存在时，从集合中移除该项，并返回 true ；否则，返回 false 。
+int getRandom() 随机返回现有集合中的一项（测试用例保证调用此方法时集合中至少存在一个元素）。每个元素应该有 相同的概率 被返回。
+你必须实现类的所有函数，并满足每个函数的 平均 时间复杂度为 O(1) 。
+
+**方法**：HashSet做不到随机在O(1)时间获取元素，必须使用紧凑数组
+
+数组可以快速的获取对应元素 所以使用数组来存储数据 但是使用数组 插入和删除的时间复杂度又不可能是O(1)
+
+所以我们需要用一个Map来记录元素对应的索引，这样插入和删除查找下标时可以直接通过Map来查找
+
+```java
+class RandomizedSet {
+    // 存储元素的值
+    List<Integer> nums;
+    // 记录每个元素对应在 nums 中的索引
+    Map<Integer, Integer> indices;
+    // 随机数
+    Random random;
+
+    public RandomizedSet() {
+        nums = new ArrayList<Integer>();
+        indices = new HashMap<Integer, Integer>();
+        random = new Random();
+    }
+
+    public boolean insert(int val) {
+        if (indices.containsKey(val)) {
+            return false;
+        }
+        int index = nums.size();
+        nums.add(val);
+        indices.put(val, index);
+        return true;
+    }
+
+    public boolean remove(int val) {
+        if (!indices.containsKey(val)) {
+            return false;
+        }
+        // 待删除数的索引
+        int index = indices.get(val);
+        int last = nums.get(nums.size() - 1);
+        // 末尾数替换到删除数的位置
+        nums.set(index, last);
+        // 末尾数的索引更改为删除数的索引
+        indices.put(last, index);
+        // 删除nums末尾的多余数
+        nums.remove(nums.size() - 1);
+        // 删除val对应的索引
+        indices.remove(val);
+        return true;
+    }
+
+    public int getRandom() {
+        int randomIndex = random.nextInt(nums.size());
+        return nums.get(randomIndex);
+    }
+}
+```
+
 
 
 ## ACM输入输出
