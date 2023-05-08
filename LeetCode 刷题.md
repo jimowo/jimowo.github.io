@@ -1031,6 +1031,94 @@ class Solution {
 }
 ```
 
+### 76 最小覆盖子串
+
+给你一个字符串 s 、一个字符串 t 。返回 s 中涵盖 t 所有字符的最小子串。如果 s 中不存在涵盖 t 所有字符的子串，则返回空字符串 "" 。
+
+注意：
+
+对于 t 中重复字符，我们寻找的子字符串中该字符数量必须不少于 t 中该字符数量。
+如果 s 中存在这样的子串，我们保证它是唯一的答案。
+
+
+示例 1：
+
+输入：s = "ADOBECODEBANC", t = "ABC"
+输出："BANC"
+解释：最小覆盖子串 "BANC" 包含来自字符串 t 的 'A'、'B' 和 'C'。
+
+**方法**：滑动窗口法 这里需要使用`Map`来当作窗口
+
+```java
+public class Solution {
+    public static String minWindow(String s, String t) {
+        // t比s长的情况
+        if (t.length() > s.length()) {
+            return "";
+        }
+        // 初始化
+        Map<Character, Integer> need = new HashMap();   // 用来判断是否已经出现过该字符
+        Map<Character, Integer> window = new HashMap();
+        int valid = 0;
+        for (int i = 0; i < t.length(); i++) {
+            add(need, t.charAt(i));
+        }
+        int head = 0;   // 记录最短覆盖串的起始位置
+        int minLen = Integer.MAX_VALUE; // 记录最短的覆盖串长度
+        // 滑动窗口
+        for (int right = 0, left = 0; right < s.length(); right++) {
+            // 扩大窗口
+            if (need.containsKey(s.charAt(right))) {
+                add(window, s.charAt(right));
+                if (window.get(s.charAt(right)) == need.get(s.charAt(right))) {
+                    valid++;
+                }
+            }
+            // 判断是否收缩窗口
+            while (valid == need.size()) {
+                // 是否更新数据
+                if (right - left + 1 < minLen) {
+                    head = left;
+                    minLen = right - left + 1;
+                }
+                // 移出窗口 收缩
+                if (need.containsKey(s.charAt(left))) {
+                    if (window.get(s.charAt(left)) == need.get(s.charAt(left))) {
+                        // 一个字符不满足个数
+                        valid--;
+                    }
+                }
+                minus(window, s.charAt(left));
+                left++;
+            }
+        }
+        // 输出
+        return minLen == Integer.MAX_VALUE ? "" : s.substring(head, head + minLen);
+    }
+
+    static void add(Map<Character, Integer> map, char key) {
+        if (!map.containsKey(key)) {
+            map.put(key, 1);
+        } else {
+            map.put(key, map.get(key) + 1);
+        }
+    }
+
+    static void minus(Map<Character, Integer> map, char key) {
+        if (map.containsKey(key)) {
+            map.put(key, map.get(key) - 1);
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(minWindow("ADOBECODEBANC", "ABC"));
+    }
+
+}
+```
+
+
+
 ### 28 实现 strStr()
 
 实现 strStr() 函数。
@@ -1365,6 +1453,130 @@ class MyStack {
     }
 }
 ```
+
+### 20 有效的括号
+
+给定一个只包括 `'('`，`')'`，`'{'`，`'}'`，`'['`，`']'` 的字符串 `s` ，判断字符串是否有效。
+
+有效字符串需满足：
+
+左括号必须用相同类型的右括号闭合。
+左括号必须以正确的顺序闭合。
+每个右括号都有一个对应的相同类型的左括号。
+
+**示例 1：**
+
+```
+输入：s = "()"
+输出：true
+```
+
+**示例 2：**
+
+```
+输入：s = "()[]{}"
+输出：true
+```
+
+**方法**：遇到左括号就⼊栈，遇到右括号就去栈中寻找最近的左括号，看是否匹配
+
+```java
+class Solution {
+    public boolean isValid(String s) {
+        // 括号不是成双成对出现 肯定错的
+        if (s.length() % 2 != 0) {
+            return false;
+        }
+        Set<Character> left = new HashSet<>();
+        left.add('(');
+        left.add('{');
+        left.add('[');
+        Stack<Character> flags = new Stack<>();	// 存储左括号
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (left.contains(c)) {
+                // 入栈
+                flags.push(c);
+            } else {
+                // 排除掉括号闭合顺序错误的情况
+                if (flags.isEmpty()) {
+                    return false;
+                }
+                // 判断左括号是否与相同类型的右括号闭合
+                char lc = flags.pop();
+                if ((c == ')' && lc != '(') ||
+                        (c == '}' && lc != '{') ||
+                        (c == ']' && lc != '[')) {
+                    return false;
+                }
+            }
+        }
+        // 排除掉缺少与左括号对应的右括号的情况
+        if (!flags.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+}
+```
+
+### 921 使括号有效的最少添加
+
+只有满足下面几点之一，括号字符串才是有效的：
+
+- 它是一个空字符串，或者
+- 它可以被写成 `AB` （`A` 与 `B` 连接）, 其中 `A` 和 `B` 都是有效字符串，或者
+- 它可以被写作 `(A)`，其中 `A` 是有效字符串。
+
+给定一个括号字符串 `s` ，在每一次操作中，你都可以在字符串的任何位置插入一个括号
+
+- 例如，如果 `s = "()))"` ，你可以插入一个开始括号为 `"(()))"` 或结束括号为 `"())))"` 。
+
+返回 *为使结果字符串 `s` 有效而必须添加的最少括号数*。
+
+**示例 1：**
+
+```
+输入：s = "())"
+输出：1
+```
+
+**示例 2：**
+
+```
+输入：s = "((("
+输出：3
+```
+
+**方法**：// 遍历完后need中存储需要的右括号数量
+        // res中存储需要的左括号数量
+
+```java
+class Solution {
+    public int minAddToMakeValid(String s) {
+        int need = 0;
+        int res = 0;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '(') {
+                need++; // 需要一个右括号
+            } else {
+                need--; // 消耗一个左括号
+                if (need == -1) {
+                    // 说明前面缺少对应的左括号 需要补一个左括号
+                    res++;
+                    need = 0;
+                }
+            }
+        }
+        // 遍历完后need中存储需要的右括号数量
+        // res中存储需要的左括号数量
+        return res + need;
+    }
+}
+```
+
+
 
 ## 5 二叉树
 
