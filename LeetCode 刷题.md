@@ -1031,7 +1031,7 @@ class Solution {
 }
 ```
 
-### 76 最小覆盖子串
+### 76 最小覆盖子串（滑动窗口）
 
 给你一个字符串 s 、一个字符串 t 。返回 s 中涵盖 t 所有字符的最小子串。如果 s 中不存在涵盖 t 所有字符的子串，则返回空字符串 "" 。
 
@@ -1114,6 +1114,63 @@ public class Solution {
         System.out.println(minWindow("ADOBECODEBANC", "ABC"));
     }
 
+}
+```
+
+### 438 找到字符串中所有字母异位词
+
+给定两个字符串 `s` 和 `p`，找到 `s` 中所有 `p` 的 **异位词** 的子串，返回这些子串的起始索引。不考虑答案输出的顺序。
+
+**异位词** 指由相同字母重排列形成的字符串（包括相同的字符串）。
+
+示例 1:
+
+输入: s = "cbaebabacd", p = "abc"
+输出: [0,6]
+解释:
+起始索引等于 0 的子串是 "cba", 它是 "abc" 的异位词。
+起始索引等于 6 的子串是 "bac", 它是 "abc" 的异位词。
+
+```java
+class Solution {
+    public List<Integer> findAnagrams(String s, String p) {
+        // 用于返回字母异位词的起始索引
+        List<Integer> res = new ArrayList<>();
+        // 用 map 存储目标值中各个单词出现的次数
+        HashMap<Character, Integer> map = new HashMap<>();
+        for (Character c : p.toCharArray()) map.put(c, map.getOrDefault(c, 0) + 1);
+        // 用另外一个 map 存储滑动窗口中有效字符出现的次数
+        HashMap<Character, Integer> window = new HashMap<>();
+        int left = 0; // 左指针
+        int right = 0; // 右指针
+        int valid = p.length(); // 只有当 valid == 0 时，才说明 window 中包含了目标子串
+        while (right < s.length()) {
+            // 如果目标子串中包含了该字符，才存入 window 中
+            if (map.containsKey(s.charAt(right))) {
+                window.put(s.charAt(right), window.getOrDefault(s.charAt(right), 0) + 1);
+                // 只有当 window 中该有效字符数量不大于map中该字符数量，才能算一次有效包含
+                if (window.get(s.charAt(right)) <= map.get(s.charAt(right))) {
+                    valid--;
+                }
+            }
+            // 如果 window 符合要求，即两个 map 存储的有效字符相同，就可以移动左指针了
+            // 但是只有二个map存储的数据完全相同，才可以记录当前的起始索引，也就是left指针所在位置
+            while (valid == 0) {
+                if (right - left + 1 == p.length()) res.add(left);
+                // 如果左指针指的是有效字符,需要更改 window 中的 key 对应的 value
+                // 如果 有效字符对应的数量比目标子串少，说明无法匹配了
+                if (map.containsKey(s.charAt(left))) {
+                    window.put(s.charAt(left), window.get(s.charAt(left)) - 1);
+                    if (window.get(s.charAt(left)) < map.get(s.charAt(left))) {
+                        valid++;
+                    }
+                }
+                left++;
+            }
+            right++;
+        }
+        return res;
+    }
 }
 ```
 
@@ -1572,6 +1629,84 @@ class Solution {
         // 遍历完后need中存储需要的右括号数量
         // res中存储需要的左括号数量
         return res + need;
+    }
+}
+```
+
+### 239 滑动窗口的最大值（单调队列）
+
+给你一个整数数组 `nums`，有一个大小为 `k` 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 `k` 个数字。滑动窗口每次只向右移动一位。
+
+返回 *滑动窗口中的最大值* 。
+
+**示例 1**
+
+```
+输入：nums = [1,3,-1,-3,5,3,6,7], k = 3
+输出：[3,3,5,5,6,7]
+解释：
+滑动窗口的位置                最大值
+---------------               -----
+[1  3  -1] -3  5  3  6  7       3
+ 1 [3  -1  -3] 5  3  6  7       3
+ 1  3 [-1  -3  5] 3  6  7       5
+ 1  3  -1 [-3  5  3] 6  7       5
+ 1  3  -1  -3 [5  3  6] 7       6
+ 1  3  -1  -3  5 [3  6  7]      7
+```
+
+**方法**：需要判断窗口中的数的大小，使用单调队列作为窗口
+
+```java
+class Solution {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        MonotonicQueue window = new MonotonicQueue();
+        List<Integer> res = new ArrayList<>();
+
+        for (int i = 0; i < nums.length; i++) {
+            // 先填满窗口
+            if (i < k - 1) {
+                window.push(nums[i]);
+            } else {
+                window.push(nums[i]);
+                // 记录当前窗口最大值
+                res.add(window.max());
+                // 缩小窗口
+                window.pop(nums[i - k + 1]);
+            }
+        }
+        
+        int[] arr = new int[res.size()];
+        for (int i = 0; i < res.size(); i++) {
+            arr[i] = res.get(i);
+        }
+        return arr;
+    }
+}
+
+// 单调队列
+class MonotonicQueue {
+    LinkedList<Integer> q = new LinkedList<>();
+
+    public void push(int n) {
+        // 将队列中小于n的元素全部删除
+        while (!q.isEmpty() && q.getLast() < n) {
+            q.pollLast();
+        }
+        // 将n加入尾部
+        q.addLast(n);
+    }
+
+    public int max() {
+        return q.getFirst();
+    }
+
+    // 删除窗口左侧元素时 如果他在队列中 就把他删除
+    // 如果不在队列中 说明它在push()中就已经被删除
+    public void pop(int n) {
+        if (n == q.getFirst()) {
+            q.pollFirst();
+        }
     }
 }
 ```
