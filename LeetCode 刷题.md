@@ -3349,6 +3349,86 @@ class Solution {
 }
 ```
 
+### 207 课程表
+
+你这个学期必须选修 numCourses 门课程，记为 0 到 numCourses - 1 。
+
+在选修某些课程之前需要一些先修课程。 先修课程按数组 prerequisites 给出，其中 prerequisites[i] = [ai, bi] ，表示如果要学习课程 ai 则 必须 先学习课程  bi 。
+
+例如，先修课程对 [0, 1] 表示：想要学习课程 0 ，你需要先完成课程 1 。
+请你判断是否可能完成所有课程的学习？如果可以，返回 true ；否则，返回 false 。
+
+示例 1：
+
+输入：numCourses = 2, prerequisites = [[1,0]]
+输出：true
+解释：总共有 2 门课程。学习课程 1 之前，你需要完成课程 0 。这是可能的。
+
+**方法**：转换为图论问题中的查找是否有闭环问题 生成图结构
+
+利⽤布尔数组 path，如果遍历过程中发现下⼀个即将遍历的节点已经被标记为 true，说明遇到了环
+
+```java
+class Solution {
+    private boolean ok = true;
+
+    private boolean[] visited;
+
+    private boolean[] path;
+
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+
+        List<Integer>[] graph = buildGraph(numCourses, prerequisites);
+        visited = new boolean[numCourses];
+        path = new boolean[numCourses];
+        for (int i = 0; i < numCourses; i++) {
+            if (!visited[i]) {
+                backtrack(graph, i);
+            }
+        }
+        return ok;
+    }
+
+    void backtrack(List<Integer>[] graph, int outIndex) {
+        if (path[outIndex]) {
+            // 出现了闭环
+            ok = false;
+            return;
+        }
+
+        // 遍历到没有要求的课程 结束
+        if (graph[outIndex].isEmpty()) {
+            return;
+        }
+        //
+        visited[outIndex] = true;
+        path[outIndex] = true;
+        for (int dot : graph[outIndex]) {
+            // 加入路径
+            backtrack(graph, dot);
+        }
+        path[outIndex] = false;
+    }
+
+    // 生成图结构
+    List<Integer>[] buildGraph(int numCourses, int[][] prerequisites) {
+        // 图中共有 numCourses 个节点
+        List<Integer>[] graph = new LinkedList[numCourses];
+            for (int i = 0; i < numCourses; i++) {
+                graph[i] = new LinkedList<>();
+                }
+            for (int[] edge : prerequisites) {
+                int from = edge[0];
+                int to = edge[1];
+                // 修完课程 from 才能修课程 to
+                // 在图中添加⼀条从 from 指向 to 的有向边
+                graph[from].add(to);
+            }
+            return graph;
+    }
+}
+```
+
 
 
 ### 4.26 华为笔试 批量初始化次数
