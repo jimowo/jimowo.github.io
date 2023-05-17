@@ -2473,6 +2473,71 @@ class Solution {
 }
 ```
 
+### 494 目标和
+
+给你一个整数数组 `nums` 和一个整数 `target` 。
+
+向数组中的每个整数前添加 `'+'` 或 `'-'` ，然后串联起所有整数，可以构造一个 **表达式** ：
+
+- 例如，`nums = [2, 1]` ，可以在 `2` 之前添加 `'+'` ，在 `1` 之前添加 `'-'` ，然后串联起来得到表达式 `"+2-1"` 。
+
+返回可以通过上述方法构造的、运算结果等于 `target` 的不同 **表达式** 的数目。
+
+**示例 1：**
+
+输入：nums = [1,1,1,1,1], target = 3
+输出：5
+解释：一共有 5 种方法让最终目标和为 3 。
+-1 + 1 + 1 + 1 + 1 = 3
++1 - 1 + 1 + 1 + 1 = 3
++1 + 1 - 1 + 1 + 1 = 3
++1 + 1 + 1 - 1 + 1 = 3
++1 + 1 + 1 + 1 - 1 = 3
+
+**方法**：回溯树中每次可选择`+nums[i]`或者`-nums[i]`，画出回溯树
+
+```java
+class Solution {
+    private int res = 0; // 记录和满足目标的表达式个数
+
+    public int findTargetSumWays(int[] nums, int target) {
+        backtrack(nums, target, 0);
+        return res;
+    }
+
+    private void backtrack(int[] nums, int target, int start) {
+        // 终止条件
+        if (start == nums.length) {
+            // 判断是否和为target
+            if (target == 0) {
+                res++;
+            }
+            return;
+        }
+        
+        // 回溯
+        // +
+        backtrack(nums, target - nums[start], start+1);
+
+        // -
+        backtrack(nums, target + nums[start], start+1);
+
+    }
+}
+```
+
+**剪枝优化**
+
+利用备忘录当在同一位置，且剩余的值相同时，直接返回备忘录中的值
+
+**方法2**：使用动态规划
+
+```
+
+```
+
+
+
 ### 131 分割回文串
 
 给你一个字符串 `s`，请你将 `s` 分割成一些子串，使每个子串都是 **回文串** 。返回 `s` 所有可能的分割方案。
