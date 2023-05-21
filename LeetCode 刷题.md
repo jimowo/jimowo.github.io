@@ -2532,8 +2532,33 @@ class Solution {
 
 **方法2**：使用动态规划
 
-```
-
+```java
+class Solution {
+    public int findTargetSumWays(int[] nums, int target) {
+        // 排除 nums 中所有数的和都小于target的情况
+        if (Arrays.stream(nums).sum() < target || - Arrays.stream(nums).sum() > target) {
+            return 0;
+        }
+        // 转换为0-1背包问题
+        // 如果我们把 nums 划分成两个子集 A 和 B，分别代表分配 + 的数和分配 - 的数，那么他们和 target 存在如下关系
+        // 可以推出 sum(A) = (target + sum(nums)) / 2，也就是把原问题转化成：nums 中存在几个子集 A，使得 A 中元素的和为 (target + sum(nums)) / 2
+        if ((target + Arrays.stream(nums).sum()) % 2 != 0) {
+            return 0;
+        }
+        int sum = (target + Arrays.stream(nums).sum()) / 2;
+        // 初始化DP数组
+        // 优化一维dp 因为新的一行只与上一行的数相关 所以计算过程中保留一行的计算结果就行
+        int[] dp = new int[sum + 1];
+        dp[0] = 1;
+        // 状态转移
+        for (int i = 0; i < nums.length; i++) {
+            for (int j = sum; j >= nums[i]; j--) {    // 优化一维dp必须倒着更新行 因为顺序更新 会直接影响这一行之后的结果
+                dp[j] = dp[j] + dp[j - nums[i]];    // 优化一维dp
+            }
+        }
+        return dp[sum];
+    }
+}
 ```
 
 
@@ -3115,7 +3140,234 @@ class Solution {
 }
 ```
 
-## 8 BFS广度优先搜索
+## 8 DFS深度优先搜索
+
+## dfs搜索框架(图论)
+
+```java
+void dfs(int[][] grid, int r, int c) {
+    // 1. 在遍历二维列表的过程中，从一个点向四周遍历
+	// 会碰到超出数组边界的情况 需要在每次递归调用之前判断是否超出数组边界
+    if (!inArea(grid, r, c)) {
+        return;
+    }
+    // 2. 如果这个格子不是岛屿，直接返回
+    if (grid[r][c] != 1) {
+        return;
+    }
+    // 3. 防止重复访问同一片区域 遍历过的区域可以打上标记
+    grid[r][c] = 2; // 将格子标记为「已遍历过」
+    
+    // 4. 向该区域的相邻区域发散 访问上、下、左、右四个相邻结点
+    dfs(grid, r - 1, c);
+    dfs(grid, r + 1, c);
+    dfs(grid, r, c - 1);
+    dfs(grid, r, c + 1);
+}
+
+// 判断坐标 (r, c) 是否在网格中
+boolean inArea(int[][] grid, int r, int c) {
+    return 0 <= r && r < grid.length 
+        	&& 0 <= c && c < grid[0].length;
+}
+
+作者：nettee
+链接：https://leetcode.cn/problems/number-of-islands/solution/dao-yu-lei-wen-ti-de-tong-yong-jie-fa-dfs-bian-li-/
+来源：力扣（LeetCode）
+```
+
+### 200 岛屿数量
+
+给你一个由 '1'（陆地）和 '0'（水）组成的的二维网格，请你计算网格中岛屿的数量。
+
+岛屿总是被水包围，并且每座岛屿只能由水平方向和/或竖直方向上相邻的陆地连接形成。
+
+此外，你可以假设该网格的四条边均被水包围。
+
+示例 1：
+
+输入：grid = [
+  ["1","1","1","1","0"],
+  ["1","1","0","1","0"],
+  ["1","1","0","0","0"],
+  ["0","0","0","0","0"]
+]
+输出：1
+
+**方法**：使用图的DFS框架，遍历整张图，遇到一块陆地就res++，并且淹没整块岛屿防止重复遍历
+
+```java
+class Solution {
+    public int numIslands(char[][] grid) {
+        int res = 0;
+        // 遍历整张图 每发现一块陆地就淹没该片的岛屿
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                if (grid[i][j] == '1') {
+                    res++;
+                    dfs(grid, i, j);
+                }
+            }
+        }
+        
+        return res;
+    }
+
+    /**
+     * 每发现一个岛屿 就把与之相邻的陆地都淹掉
+     * @param grid 图
+     * @param i 行
+     * @param j 列
+     */
+    void dfs(char[][] grid, int i, int j) {
+        // 数组的边界判断
+        int m = grid.length, n = grid[0].length;
+        if (i < 0 || j < 0 || i >= m || j >= n) {
+            // 超出索引边界
+            return;
+        }
+        if (grid[i][j] == '0') {
+            // 当前区域是海水
+            return;
+        }
+        // 遍历过的陆地直接淹没 防止之后重复遍历
+        grid[i][j] = '0';
+        // 淹没相邻的陆地
+        dfs(grid, i + 1, j);
+        dfs(grid, i, j + 1);
+        dfs(grid, i - 1, j);
+        dfs(grid, i, j - 1);
+    }
+
+    
+}
+```
+
+### 695 岛屿的最大面积
+
+简单题 图的遍历稍作修改
+
+```java
+class Solution {
+
+    public int maxAreaOfIsland(int[][] grid) {
+        int res = 0;
+        for (int i = 0; i < grid.length; i++) {
+            for (int j = 0; j < grid[0].length; j++) {
+                if (grid[i][j] == 1) {
+                    // 遍历到陆地
+                    // 计算当前岛屿的面积
+                    res = Math.max(dfs(grid, i, j), res);
+                }
+            }
+        }
+        return res;
+    }
+
+    /**
+     * 每发现一个岛屿 就把与之相邻的陆地都淹掉
+     * 
+     * @param grid 图
+     * @param i    行
+     * @param j    列
+     */
+    int dfs(int[][] grid, int i, int j) {
+        // 数组的边界判断
+        int m = grid.length, n = grid[0].length;
+        if (i < 0 || j < 0 || i >= m || j >= n) {
+            // 超出索引边界
+            return 0;
+        }
+        if (grid[i][j] == 0) {
+            // 当前区域是海水
+            return 0;
+        }
+        // 遍历过的区域 淹掉
+        grid[i][j] = 0;
+        // 淹没相邻的陆地
+        return 1 + dfs(grid, i + 1, j) +
+                dfs(grid, i, j + 1) +
+                dfs(grid, i - 1, j) +
+                dfs(grid, i, j - 1);
+    }
+
+}
+```
+
+### 1254 统计封闭岛屿的数目
+
+二维矩阵 `grid` 由 `0` （土地）和 `1` （水）组成。岛是由最大的4个方向连通的 `0` 组成的群，封闭岛是一个 `完全` 由1包围（左、上、右、下）的岛。
+
+请返回 *封闭岛屿* 的数目。
+
+**示例 1：**
+
+![img](https://assets.leetcode.com/uploads/2019/10/31/sample_3_1610.png)
+
+输入：grid = [[1,1,1,1,1,1,1,0],[1,0,0,0,0,1,1,0],[1,0,1,0,1,1,1,0],[1,0,0,0,0,1,0,1],[1,1,1,1,1,1,1,0]]
+输出：2
+解释：
+灰色区域的岛屿是封闭岛屿，因为这座岛屿完全被水域包围（即被 1 区域包围）。
+
+**方法**：参考200题 在计算岛屿数量的基础上 先排除掉靠边的岛屿
+
+```java
+class Solution {
+
+    public int closedIsland(int[][] grid) {
+        int res = 0;
+        // 排除掉靠边岛屿
+        for (int i = 0; i < grid.length; i++) {
+            dfs(grid, i, 0);
+            dfs(grid, i, grid[0].length - 1);
+        }
+        for (int i = 0; i < grid[0].length; i++) {
+            dfs(grid, 0, i);
+            dfs(grid, grid.length - 1, i);
+        }
+        // 计算封闭岛屿数量
+        for (int i = 1; i < grid.length; i++) {
+            for (int j = 1; j < grid[0].length; j++) {
+                if (grid[i][j] == 0) {
+                    res++;
+                    dfs(grid, i, j);
+                }
+            }
+        }
+        return res;
+    }
+
+    /**
+     * 每发现一个岛屿 就把与之相邻的陆地都淹掉
+     * 
+     * @param grid 图
+     * @param i    行
+     * @param j    列
+     */
+    void dfs(int[][] grid, int i, int j) {
+        // 数组的边界判断
+        int m = grid.length, n = grid[0].length;
+        if (i < 0 || j < 0 || i >= m || j >= n) {
+            // 超出索引边界
+            return;
+        }
+        if (grid[i][j] == 1) {
+            // 当前区域是海水
+            return;
+        }
+        // 遍历过的区域 淹掉
+        grid[i][j] = 1;
+        // 淹没相邻的陆地
+        dfs(grid, i + 1, j);
+        dfs(grid, i, j + 1);
+        dfs(grid, i - 1, j);
+        dfs(grid, i, j - 1);
+    }
+
+}
+```
+
+## 9 BFS广度优先搜索
 
 ### 模板
 
@@ -3281,7 +3533,7 @@ class Solution {
 }
 ```
 
-## 9 图论算法
+## 10 图论算法
 
 ### 797 所有可能路径
 
@@ -3602,7 +3854,7 @@ public class Main {
 }
 ```
 
-## 10 数据结构设计
+## 11 数据结构设计
 
 ### 146 LRU缓存
 
