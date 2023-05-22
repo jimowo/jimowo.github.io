@@ -3142,7 +3142,7 @@ class Solution {
 
 ## 8 DFS深度优先搜索
 
-## dfs搜索框架(图论)
+### dfs搜索框架(图论)
 
 ```java
 void dfs(int[][] grid, int r, int c) {
@@ -3366,6 +3366,261 @@ class Solution {
 
 }
 ```
+
+### 130 被围绕的区域（并查集）
+
+给你一个 `m x n` 的矩阵 `board` ，由若干字符 `'X'` 和 `'O'` ，找到所有被 `'X'` 围绕的区域，并将这些区域里所有的 `'O'` 用 `'X'` 填充。
+
+**示例 1：**
+
+![img](https://assets.leetcode.com/uploads/2021/02/19/xogrid.jpg)
+
+```
+输入：board = [["X","X","X","X"],["X","O","O","X"],["X","X","O","X"],["X","O","X","X"]]
+输出：[["X","X","X","X"],["X","X","X","X"],["X","X","X","X"],["X","O","X","X"]]
+解释：被围绕的区间不会存在于边界上，换句话说，任何边界上的 'O' 都不会被填充为 'X'。 任何不在边界上，或不与边界上的 'O' 相连的 'O' 最终都会被填充为 'X'。如果两个元素在水平或垂直方向相邻，则称它们是“相连”的。
+```
+
+**方法1**：参考统计封闭岛屿数目的方法，先给边缘的陆地打上标记，再把被围绕的区域淹没，最后再把边缘区域还原
+
+```java
+class Solution {
+
+    public void solve(char[][] board) {
+        // 排除掉靠边岛屿
+        for (int i = 0; i < board.length; i++) {
+            notIsland(board, i, 0);
+            notIsland(board, i, board[0].length - 1);
+        }
+        for (int i = 0; i < board[0].length; i++) {
+            notIsland(board, 0, i);
+            notIsland(board, board.length - 1, i);
+        }
+        // 遍历图
+        for (int i = 1; i < board.length; i++) {
+            for (int j = 1; j < board[0].length; j++) {
+                if (board[i][j] == 'O') {
+                    dfs(board, i, j);
+                }
+            }
+        }
+        for (int i = 0; i < board.length; i++) {
+            for (int j = 0; j < board[0].length; j++) {
+                if (board[i][j] == 'E') {
+                    board[i][j] = 'O';
+                }
+            }
+        }
+    }
+
+    /**
+     * 每发现一个岛屿 就把与之相邻的陆地都淹掉
+     * 
+     * @param grid 图
+     * @param i    行
+     * @param j    列
+     */
+    void dfs(char[][] grid, int i, int j) {
+        // 数组的边界判断
+        int m = grid.length, n = grid[0].length;
+        if (i < 0 || j < 0 || i >= m || j >= n) {
+            // 超出索引边界
+            return;
+        }
+        if (grid[i][j] == 'X' || grid[i][j] == 'E') {
+            // 当前区域是海水
+            return;
+        }
+        // 遍历过的区域 淹掉
+        grid[i][j] = 'X';
+        // 淹没相邻的陆地
+        dfs(grid, i + 1, j);
+        dfs(grid, i, j + 1);
+        dfs(grid, i - 1, j);
+        dfs(grid, i, j - 1);
+    }
+
+    void notIsland(char[][] grid, int i, int j) {
+        // 数组的边界判断
+        int m = grid.length, n = grid[0].length;
+        if (i < 0 || j < 0 || i >= m || j >= n) {
+            // 超出索引边界
+            return;
+        }
+        if (grid[i][j] == 'X' || grid[i][j] == 'E') {
+            // 当前区域是海水
+            return;
+        }
+        // 遍历过的区域 淹掉
+        grid[i][j] = 'E';
+        // 淹没相邻的陆地
+        notIsland(grid, i + 1, j);
+        notIsland(grid, i, j + 1);
+        notIsland(grid, i - 1, j);
+        notIsland(grid, i, j - 1);
+    }
+}
+```
+
+**方法2**：并查集
+
+**并查集**常用来解决连通性的问题，即将一个图中连通的部分划分出来
+
+并查集的思想就是，同一个连通区域内的所有点的根节点是同一个，使用数组来存储每个节点的根节点
+
+本题把所有的边缘区域看做是一整块联通区域（因为实际上这些区域在图上不是真正的连在一起所以我们需要一个虚拟的根节点）。先预处理，把边界上的O都与一个虚拟根节点相连，接着遍历整张图当发现O时让它与它上下左右四个节点相连（即让它们指向同一个根节点），最后再次遍历整张图，把根节点不为虚拟节点的节点替换为X
+
+**并查集模板类**
+
+```java
+/**
+ * 并查集
+ */
+class UF{
+    private int[] ID;
+    private int[] treeSize;
+    public UF(int N){
+        ID = new int[N];
+        treeSize = new int[N];
+        for(int i = 0; i < N; i++){
+            ID[i] = i;
+            treeSize[i] = 1;
+        }
+    }
+
+    public int find(int i){
+        //查找当前树的根节点
+        int root = i;
+        while(root != ID[root])
+            root = ID[root];
+
+        //路径压缩  所有子节点直接指向根节点
+        int next;
+        while(i != ID[i]){
+            next = ID[i];
+            ID[i] = root;
+            i = next;
+        }
+        return root;
+    }
+
+    public boolean connected(int p, int q){
+        return find(p) == find(q);
+    }
+
+    public void union(int p, int q){
+        if(find(p) == find(q))
+            return;
+        if(treeSize[p] < treeSize[q]) //小树链接到大树上
+            ID[ID[p]] = ID[q]; //在调用find后，　路径被压缩，　因此ID[p]即为根节点, 同理ID[q]也为根节点
+        else
+            ID[ID[q]] = ID[p];
+    }
+
+    //将二维坐标转化为一维坐标, 便于并查集使用
+    //ｘ为二维数组的一维索引，　ｙ为二维数组的二维索引
+    public static int flatternTowDim(int x, int y, int width){
+        return x * width + y;
+    }
+}
+```
+
+**实现代码**
+
+```java
+class Solution {
+
+    //并查集类
+    class UF{
+        private int[] ID;
+        private int[] treeSize;
+        public UF(int N){
+            ID = new int[N];
+            treeSize = new int[N];
+            for(int i = 0; i < N; i++){
+                ID[i] = i;
+                treeSize[i] = 1;
+            }
+        }
+
+        public int find(int i){
+            //查找当前树的根节点
+            int root = i;
+            while(root != ID[root])
+                root = ID[root];
+
+            //路径压缩 所有子节点直接指向根节点
+            int next;
+            while(i != ID[i]){
+                next = ID[i];
+                ID[i] = root;
+                i = next;
+            }
+            return root;
+        }
+
+        public boolean connected(int p, int q){
+            return find(p) == find(q);
+        }
+
+        public void union(int p, int q){
+            if(find(p) == find(q))
+                return;
+            if(treeSize[p] < treeSize[q]) //小树链接到大树上
+                ID[ID[p]] = ID[q]; //在调用find后，　路径被压缩，　因此ID[p]即为根节点, 同理ID[q]也为根节点
+            else
+                ID[ID[q]] = ID[p];
+        }    
+    }
+
+    //将二维坐标转化为一维坐标, 便于并查集使用
+    //ｘ为二维数组的一维索引，　ｙ为二维数组的二维索引
+    private int flatternTowDim(int x, int y, int width){
+        return x * width + y;
+    }
+
+    public void solve(char[][] board) {
+        if(board.length == 0) return;
+        int len = board.length;
+        int width = board[0].length;
+        int boardSize = len * width;
+        UF uf = new UF(boardSize+1);
+        //添加一个虚拟节点，所有位于边界的Ｏ节点均与该虚拟节点相连接
+        int i, j;
+        for(i = 0; i < board.length; i++){
+            for(j = 0; j < board[0].length; j++){
+                if((i == 0 || i == board.length-1 || j == 0 || j == board[0].length-1) && board[i][j]=='O')
+                    uf.union(flatternTowDim(i, j, width), boardSize);
+            }
+        }
+
+        //遍历搜索相邻的Ｏ，添加到并查集中
+        for(i = 0; i < board.length; i++){
+            for(j = 0;j < board[0].length; j++){
+                if(board[i][j] == 'O'){
+                    //将当前Ｏ点与其下右两个方向的Ｏ点相连接(只需要连接你遍历数组的两个方向就可以全部连接了)
+                    
+                    if(i+1 < board.length && board[i+1][j] == 'O')
+                        uf.union(flatternTowDim(i+1, j, width), flatternTowDim(i, j, width));
+                    
+                    if(j+1 <= board[0].length && board[i][j] == 'O')
+                        uf.union(flatternTowDim(i, j+1, width), flatternTowDim(i, j, width));
+                }
+            }
+        }
+
+        //将所有与边界节点不相连的＇Ｏ＇点替换为＇Ｘ＇
+        for(i = 0; i < board.length; i++){
+            for(j = 0; j < board[0].length; j++){
+                if(board[i][j] == 'O' && !uf.connected(flatternTowDim(i, j, width), boardSize))
+                    board[i][j] = 'X';
+            }
+        }
+    }
+}
+```
+
+
 
 ## 9 BFS广度优先搜索
 
