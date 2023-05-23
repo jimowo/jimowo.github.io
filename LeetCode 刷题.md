@@ -78,6 +78,64 @@ class Solution {
 }
 ```
 
+### 18 四数之和
+
+给出一个求N数之和的框架
+
+```java
+class Solution {
+
+    /**
+     * @apiNote N个数的和问题通用解法 使用递归分解问题
+     * @param nums 数组
+     * @param n 计算n个数和
+     * @param start 开始位置
+     * @param target 目标和 使用long类型以防超出int类型范围
+     */
+    List<List<Integer>> backtrackNSum(int[] nums, int n, int start, long target) {
+
+        List<List<Integer>> res = new ArrayList<>();
+
+        if (n < 2 || nums.length < n) {
+            return res;
+        }
+        if (n == 2) {
+            // 两数之和
+            int lo = start, hi = nums.length - 1;
+            while (lo < hi) {
+                int sum = nums[lo] + nums[hi];
+                int left = nums[lo], right = nums[hi];
+                if (sum < target) {
+                    // 跳过相同的数
+                    while (lo < hi && nums[lo] == left) lo++;
+                } else if (sum > target) {
+                    while (lo < hi && nums[hi] == right) hi--;
+                } else {
+                    res.add(new ArrayList<>(Arrays.asList(left, right)));
+                    // 跳过所有重复的元素
+                    while (lo < hi && nums[lo] == left) lo++;
+                    while (lo < hi && nums[hi] == right) hi--;
+                }
+            }
+        } else {
+            // 超过两数之和 递归计算
+            for (int i = start;i < nums.length; i++) {
+                List<List<Integer>> sub = backtrackNSum(nums, n - 1, i + 1, (long)(target - nums[i]));
+                for (List<Integer> list : sub) {
+                    list.add(nums[i]);
+                    res.add(list);
+                }
+                // 跳过重复数
+                while (i < nums.length - 1 && nums[i] == nums[i + 1]) i++;
+            }
+        }
+        return res;
+    }
+}
+```
+
+
+
 ### 977 有序数组的平方
 
 给你一个按 非递减顺序 排序的整数数组 nums，返回 每个数字的平方 组成的新数组，要求也按 非递减顺序 排序。
