@@ -78,7 +78,143 @@ class Solution {
 }
 ```
 
-### 18 四数之和
+### 42 接雨水（动态规划 前后指针）
+
+给定 `n` 个非负整数表示每个宽度为 `1` 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
+
+**示例 1：**
+
+![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/10/22/rainwatertrap.png)
+
+输入：height = [0,1,0,2,1,0,1,3,2,1,2,1]
+输出：6
+解释：上面是由数组 [0,1,0,2,1,0,1,3,2,1,2,1] 表示的高度图，在这种情况下，可以接 6 个单位的雨水（蓝色部分表示雨水）。 
+
+**方法1**：暴力解法
+
+```java
+water[i] = min(
+               # 左边最高的柱子
+               max(height[0..i]),  
+               # 右边最高的柱子
+               max(height[i..end]) 
+            ) - height[i]
+```
+
+```java
+class Solution {
+
+    public int trap(int[] height) {
+        // 先找极小值
+        // 再向极小值的两边找极大值
+        // 用最小的极大值减去中间区域的值 相加 得到该区域接的雨水
+        int n = height.length;
+        int res = 0;
+        for (int i = 1; i < n - 1; i++) {
+            int l_max = 0, r_max = 0;
+            // 找右边最高的柱子
+            for (int j = i; j < n; j++)
+                r_max = Math.max(r_max, height[j]);
+            // 找左边最高的柱子
+            for (int j = i; j >= 0; j--)
+                l_max = Math.max(l_max, height[j]);
+            // 如果自己就是最高的话，
+            // l_max == r_max == height[i]
+            res += Math.min(l_max, r_max) - height[i];
+        }
+        return res;
+    }
+}
+```
+
+**方法2**：备忘录 先提前计算好每个位置的左右最大柱子高度 避免计算雨水时的重复计算
+
+```java
+class Solution {
+
+    // 备忘录优化
+    public int trap(int[] height) {
+        if (height.length == 0) {
+            return 0;
+        }
+        int n = height.length;
+        int res = 0;
+        // 数组充当备忘录
+        int[] l_max = new int[n];
+        int[] r_max = new int[n];
+        // 初始化 base case
+        l_max[0] = height[0];
+        r_max[n - 1] = height[n - 1];
+        // 从左向右计算 l_max
+        for (int i = 1; i < n; i++)
+            l_max[i] = Math.max(height[i], l_max[i - 1]);
+        // 从右向左计算 r_max
+        for (int i = n - 2; i >= 0; i--)
+            r_max[i] = Math.max(height[i], r_max[i + 1]);
+        // 计算答案
+        for (int i = 1; i < n - 1; i++)
+            res += Math.min(l_max[i], r_max[i]) - height[i];
+        return res;
+    }
+}
+```
+
+**方法3**：继续优化dp数组的空间 很明显可以优化到1
+
+```java
+class Solution {
+    public int trap(int[] height) {
+        if (height.length == 0) {
+            return 0;
+        }
+        // 动态规划 双dp数组 分别记录每个i对应位置的左边最大值和右边最大值
+        // 1. 初始化dp数组(dp数组空间优化 仅记录左最大和右最大)
+        int l_max = 0;
+        int r_max = 0;
+
+        int left = 0, right = height.length - 1;
+        int res = 0;
+        while (left < right) {
+            // 更新dp
+            l_max = Math.max(l_max, height[left]);
+            r_max = Math.max(r_max, height[right]);
+            // 计算结果
+            // res += min(l_max, r_max) - height[i]
+            if (l_max < r_max) {
+                res += l_max - height[left];
+                left++;
+            } else {
+                res += r_max - height[right];
+                right--;
+            }
+        }
+        return res;
+    }
+}
+```
+
+### 1 两数之和
+
+这题要返回下标 所以先排序再左右指针的方法不适用
+
+```java
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        // 优化时间
+        // 遍历一遍过程中记录后面是否有满足与前面和=target的数
+        Map<Integer, Integer> need = new HashMap();
+        for (int left = 0; left < nums.length; left++) {
+            if (need.containsKey(target - nums[left])) {
+                return new int[] { need.get(target - nums[left]), left };
+            }
+            need.put(nums[left], left);
+        }
+        return null;
+    }
+}
+```
+
+### 18 四数之和(排序后的左右指针)
 
 给出一个求N数之和的框架
 
@@ -91,6 +227,7 @@ class Solution {
      * @param n 计算n个数和
      * @param start 开始位置
      * @param target 目标和 使用long类型以防超出int类型范围
+     * @return 返回满足情况的所有解
      */
     List<List<Integer>> backtrackNSum(int[] nums, int n, int start, long target) {
 
@@ -1088,6 +1225,43 @@ class Solution {
     }
 }
 ```
+
+### 3 无重复字符的最长子串（滑动窗口）
+
+给定一个字符串 `s` ，请你找出其中不含有重复字符的 **最长子串** 的长度。
+
+**示例 1:**
+
+```
+输入: s = "abcabcbb"
+输出: 3 
+解释: 因为无重复字符的最长子串是 "abc"，所以其长度为 3。
+```
+
+**方法**：滑动窗口法 s由英文字母、数字、符号和空格组成 所以用一个128位的数组来记录s中每个字符的出现次数
+
+```java
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+
+        int[] abc = new int[128]; // 记录128个字符出现的个数
+        int res = 0;
+        for (int left = 0, right = 0; right < s.length(); right++) {
+            abc[s.charAt(right) - ' ']++;
+            // 左移窗口
+            while (abc[s.charAt(right) - ' '] > 1) {
+                abc[s.charAt(left) - ' '] -= 1;
+                left++; 
+            };  
+            // 记录当前的最大长度
+            res = Math.max(res, right - left + 1);
+        }
+        return res;
+    }
+}
+```
+
+
 
 ### 76 最小覆盖子串（滑动窗口）
 
