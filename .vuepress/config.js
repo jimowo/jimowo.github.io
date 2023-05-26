@@ -28,6 +28,7 @@ export default defineUserConfig({
                 'link': '/',
             },
             'Java基础笔记.md',
+            'JUC并发编程',
             '图解HTTP笔记.md',
             'JavaWeb笔记.md',
             'Spring笔记.md',
