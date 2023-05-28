@@ -189,7 +189,7 @@ CompletableFuture提供了一种观察者模式类似的机制，可以让任务
 
 > **CompletableFuture继承实现关系**
 
-![image-20230526173657051](JUC并发编程.assets/image-20230526173657051.png) 
+![image-20230526173657051](./JUC并发编程.assets/image-20230526173657051.png) 
 
 > **CompletionStage接口源码**
 
