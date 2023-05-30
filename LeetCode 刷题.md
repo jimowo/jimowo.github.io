@@ -30,6 +30,45 @@ class Solution {
 }
 ```
 
+### 739 每日温度
+
+给定一个整数数组 temperatures ，表示每天的温度，返回一个数组 answer ，其中 answer[i] 是指对于第 i 天，下一个更高温度出现在几天后。如果气温在这之后都不会升高，请在该位置用 0 来代替。
+
+**示例 1:**
+
+```
+输入: temperatures = [73,74,75,71,69,72,76,73]
+输出: [1,1,4,2,1,1,0,0]
+```
+
+**方法**：暴力法 但是不太暴力
+
+双层for循环，每个都向后查找一个比该天温度高的那天，两指针相减得到res
+
+但是在每次的向后判断过程中有很多重复的判断，优化暴力法，选择从后向前遍历
+
+```java
+class Solution {
+    public int[] dailyTemperatures(int[] temperatures) {
+
+        int[] res = new int[temperatures.length];
+        for (int i = temperatures.length - 2; i >= 0; i--) {
+            for (int j =  i + 1; j < temperatures.length; j+=res[j]) {
+                if (temperatures[j] > temperatures[i]) {
+                    res[i] = j - i;
+                    break;
+                }
+                if (res[j] == 0) {
+                    res[i] = 0;
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+}
+```
+
 ### 27 移除元素（前后指针法）
 
 方法一：单指针暴力法
