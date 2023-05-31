@@ -185,11 +185,163 @@ Future中get()方法会阻塞，isDone()方法容易耗费CPU资源
 
 CompletableFuture提供了一种观察者模式类似的机制，可以让任务执行完成后通知监听的一方
 
+> **CompletableFuture使用场景**
+
+![image.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0fb5ce9a8da7473ba23903a17c8beeae~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp) 
+
 ### 2.5 CompletableFuture源码分析
+
+#### 2.5.1 CompletableFuture介绍
 
 > **CompletableFuture继承实现关系**
 
 ![image-20230526173657051](./JUC并发编程.assets/image-20230526173657051.png) 
 
+- **常用方法**
+
+  #### supplyAsync方法（有返回值）
+
+  ```swift
+  //使用默认内置线程池ForkJoinPool.commonPool()，根据supplier构建执行任务
+  public static <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier)
+  //自定义线程，根据supplier构建执行任务
+  public static <U> CompletableFuture<U> supplyAsync(Supplier<U> supplier, Executor executor)
+  ```
+
+  #### runAsync方法
+
+  ```java
+  //使用默认内置线程池ForkJoinPool.commonPool()，根据runnable构建执行任务
+  public static CompletableFuture<Void> runAsync(Runnable runnable) 
+  //自定义线程，根据runnable构建执行任务
+  public static CompletableFuture<Void> runAsync(Runnable runnable,  Executor executor)
+  ```
+
+  上面两个方法如果不指定线程池，则默认使用**ForkJoinPool.commonPool**
+
+#### 2.5.2 CompletionStage分析
+
 > **CompletionStage接口源码**
 
+```java
+//依赖单个阶段
+public <U> CompletionStage<U> thenApply(Function<? super T,? extends U> fn);     // 默认执行方式
+public <U> CompletionStage<U> thenApplyAsync(Function<? super T,? extends U> fn);// 默认的异步执行方式
+public <U> CompletionStage<U> thenApplyAsync(Function<? super T,? extends U> fn,Executor executor); //自定义的执行方式
+
+//依赖两个阶段都完成
+public <U,V> CompletionStage<V> thenCombine(CompletionStage<? extends U> other, BiFunction<? super T,? super U,? extends V> fn);
+public <U,V> CompletionStage<V> thenCombineAsync(CompletionStage<? extends U> other, BiFunction<? super T,? super U,? extends V> fn);
+public <U,V> CompletionStage<V> thenCombineAsync(CompletionStage<? extends U> other, BiFunction<? super T,? super U,? extends V> fn, Executor executor);
+
+//依赖两个阶段中的任何一个完成
+public <U> CompletionStage<U> applyToEither(CompletionStage<? extends T> other,Function<? super T, U> fn);
+public <U> CompletionStage<U> applyToEitherAsync(CompletionStage<? extends T> other,Function<? super T, U> fn);
+public <U> CompletionStage<U> applyToEitherAsync(CompletionStage<? extends T> other,Function<? super T, U> fn,Executor executor);
+```
+
+> **CompletionStage接口源码demo**
+
+```java
+package ymkedu.auc;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.*;
+
+public class CompletableFutureDemo {
+
+    // 前一个阶段执行完才能执行下一个阶段
+    @Test
+    public void thenApply() throws ExecutionException, InterruptedException {
+        CompletableFuture<String> stage = CompletableFuture.supplyAsync(() -> "hello")
+                .thenApply(s -> s + " world");
+
+        String result = stage.get();
+        System.out.println(result);
+    }
+
+    // 两个阶段都完成才能输出结果
+    @Test
+    public void thenCombine() {
+        String result = CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "hello";
+        }).thenCombine(CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "world";
+        }), (s1, s2) -> s1 + " " + s2).join();
+        System.out.println(result);
+    }
+
+    // 两个阶段谁先完成就输出结果
+    @Test
+    public void applyToEither() {
+        String result = CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "Tom";
+        }).applyToEither(CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "John";
+        }), s -> "hello " + s).join();
+        System.out.println(result);
+    }
+}
+```
+
+#### 2.5.3 CompletableFuture使用例子
+
+```java
+import java.util.concurrent.*;
+
+public class CompletableFutureUse {
+
+    public static void main(String[] args) {
+
+        ExecutorService threadPool = Executors.newFixedThreadPool(3);
+        try {
+            CompletableFuture.supplyAsync(() -> {
+                System.out.println(Thread.currentThread().getName() + "----start");
+                int res = ThreadLocalRandom.current().nextInt();
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return res;
+            }, threadPool).whenComplete((v, e) -> {
+                if (e == null) {
+                    System.out.println("----计算完成 结果为 -> " + v);
+                }
+            }).exceptionally((e) -> {
+                System.out.println("----异常 -> " + e.getMessage());
+                return null;
+            });
+        } finally {
+            // 自定义的线程池 记得要关闭
+            threadPool.shutdown();
+        }
+
+        System.out.println("----main线程");
+
+    }
+}
+```
+
+### 2.6 电商案例精讲
