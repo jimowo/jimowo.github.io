@@ -344,4 +344,221 @@ public class CompletableFutureUse {
 }
 ```
 
-### 2.6 电商案例精讲
+### 2.6 函数式编程
+
+#### 2.6.1 函数式接口
+
+> **Runnable接口(无参数无返回值)**
+
+```java
+@FunctionalInterface
+public interface Runnable {
+
+    public abstract void run();
+}
+```
+
+>**Function<T, R>**
+
+```java
+@FunctionalInterface
+public interface Function<T, R> {
+
+    R apply(T t);
+
+    default <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
+        Objects.requireNonNull(before);
+        return (V v) -> apply(before.apply(v));
+    }
+
+    default <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
+        Objects.requireNonNull(after);
+        return (T t) -> after.apply(apply(t));
+    }
+
+    static <T> Function<T, T> identity() {
+        return t -> t;
+    }
+}
+
+```
+
+>**Consumer\<T\>**
+
+```java
+@FunctionalInterface
+public interface Consumer<T> {
+
+    void accept(T t);
+
+    default Consumer<T> andThen(Consumer<? super T> after) {
+        Objects.requireNonNull(after);
+        return (T t) -> { accept(t); after.accept(t); };
+    }
+}
+
+```
+
+>**Supplier**
+
+```java
+@FunctionalInterface
+public interface Supplier<T> {
+
+    T get();
+}
+```
+
+#### 2.6.2 链式编程
+
+> **一个简单的例子**
+
+```java
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+public class CompletableFutureMall {
+
+    public static void main(String[] args) {
+        Student student = new Student();
+        
+        // 传统赋值
+        student.setId(1);
+        student.setName("ZhangSan");
+        student.setMajor("Math");
+
+        // 链式
+        student.setId(2).setName("LiSi").setMajor("English");
+    }
+}
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
+class Student {
+    private Integer id;
+    private String name;
+    private String major;
+}
+
+```
+
+> **链式编程原理**
+
+返回类型与当前变量类型相同，或者直接返回this
+
+#### 2.6.3 join与get对比
+
+`join()`与`get()`的区别，`join()`不会报异常
+
+```java
+import java.util.concurrent.CompletableFuture;
+
+public class CompletableFutureMall {
+
+    public static void main(String[] args) {
+
+        CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> {
+            return "hello";
+        });
+		// System.out.println(completableFuture.get());
+        System.out.println(completableFuture.join());
+    }
+}
+```
+
+### 2.7 例子：电商网站比价
+
+#### 2.7.1 需求
+
+> 1. 同一款产品，同时搜索出各个电商平台的售价
+> 2. 同一款产品，同时搜索出在同一个平台的所有卖家的售价
+> 3. 输出结果返回一个`List<String>` 
+
+#### 2.7.2 demo
+
+```java
+import lombok.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+public class CompletableFutureMall {
+
+    static List<NetMall> netMalls = Arrays.asList(
+            new NetMall("jd"),
+            new NetMall("taobao"),
+            new NetMall("dangdang"),
+            new NetMall("pdd")
+    );
+
+    public static List<String> getPrice(List<NetMall> netMalls, String productName) {
+        return netMalls
+                .stream()
+                .map(netMall ->
+                        String.format(productName + "in %s price is %.2f",
+                                netMall.getNetMallName(),
+                                netMall.calcPrice(productName)))
+                .collect(Collectors.toList());
+    }
+
+    public static List<String> getPriceByCompletableFuture(List<NetMall> netMalls, String productName) {
+        return netMalls
+                .stream()
+                .map(netMall -> CompletableFuture.supplyAsync(() ->
+                    String.format(productName + "in %s price is %.2f",
+                            netMall.getNetMallName(),
+                            netMall.calcPrice(productName))))
+                .collect(Collectors.toList())
+                .stream()
+                .map(s -> s.join())
+                .collect(Collectors.toList());
+    }
+
+    public static void main(String[] args) {
+
+        long startTime = System.currentTimeMillis();
+
+        System.out.println(getPrice(netMalls, "mysql"));
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("运行消耗 " + (endTime - startTime) + " 毫秒");
+
+        startTime = System.currentTimeMillis();
+
+        System.out.println(getPriceByCompletableFuture(netMalls, "mysql"));
+
+        endTime = System.currentTimeMillis();
+
+        System.out.println("运行消耗 " + (endTime - startTime) + " 毫秒");
+
+    }
+}
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+class NetMall {
+
+    private String netMallName;
+
+    public double calcPrice(String productName) {
+
+        // 假设计算需要1s
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return ThreadLocalRandom.current().nextDouble() * 2 + productName.charAt(0);
+    }
+}
+```
+
