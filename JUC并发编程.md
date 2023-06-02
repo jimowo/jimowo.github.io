@@ -387,6 +387,39 @@ public class CompletableFutureDemo {
 }
 ```
 
+> **thenCombine作业**
+
+```java
+@Test
+    public void thenCombine() {
+        String result = CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "hello";
+        }).thenCombine(CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "world";
+        }), (s1, s2) -> s1 + " " + s2).thenCombine((CompletableFuture.supplyAsync(() -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return "then combine";
+        })), (a, b) -> a + b).join();
+        System.out.println(result);
+    }
+```
+
+
+
 #### 2.5.3 CompletableFuture使用例子
 
 ```java
