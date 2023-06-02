@@ -218,6 +218,88 @@ CompletableFuture提供了一种观察者模式类似的机制，可以让任务
   ```
 
   上面两个方法如果不指定线程池，则默认使用**ForkJoinPool.commonPool**
+  
+  > **1.获取结果和触发计算**
+  
+  #### get方法
+  
+  阻塞获取结果
+  
+  ```java
+  public T get()
+  ```
+  
+  #### getNow方法
+  
+  立马获取结果，可以设置默认值，即没有得到真正结果返回的替代值
+  
+  ```java
+  public T getNow(T valueIfAbsent)
+  ```
+  
+  #### complete方法
+  
+  如果阶段没有运行完，则打断运行过程把value值作为阶段的结果
+  
+  ```java
+  public boolean complete(T value)
+  ```
+  
+  > **2.对计算结果进行处理(有返回值)**
+  
+  #### thenApply方法（串行化）
+  
+  计算结果作为输入参数传给下一个阶段
+  
+  ```java
+  public <U> CompletableFuture<U> thenApply(
+          Function<? super T,? extends U> fn)
+  ```
+  
+  #### handle方法（串行化）
+  
+  与`thenApply()`区别，有异常也可以继续执行，根据异常参数进一步处理
+  
+  ```java
+  public <U> CompletableFuture<U> handle(
+          BiFunction<? super T, Throwable, ? extends U> fn)
+  ```
+  
+  > **3.对计算结果进行消费(无返回值)**
+  
+  #### thenAccept方法
+  
+  消费前一个阶段的计算结果
+  
+  ```java
+  public CompletableFuture<Void> thenAccept(Consumer<? super T> action)
+  ```
+  
+  > **4.执行下一阶段(无参数无返回值)**
+  
+  #### thenRun方法
+  
+  ```java
+  public CompletableFuture<Void> thenRun(Runnable action)
+  ```
+  
+  > **5.异步方法**
+  
+  #### thenRunAsync方法
+  
+  如果不传入自定义线程池，所有阶段都用默认线程池；如果传入自定义线程池，则第一阶段用自定义线程池，之后的then异步阶段传入默认线程池ForkJoinPool（PS：有可能因为系统优化切换原则，使用main线程处理）
+  
+  ```java
+  // 查看源码可以看到 传入了一个异步线程池
+  public CompletableFuture<Void> thenRunAsync(Runnable action) {
+          return uniRunStage(asyncPool, action);
+  }
+  // asyncPool的源码
+  private static final Executor asyncPool = useCommonPool ?
+          ForkJoinPool.commonPool() : new ThreadPerTaskExecutor();
+  ```
+  
+  
 
 #### 2.5.2 CompletionStage分析
 
