@@ -734,3 +734,57 @@ synchronized是Java中的关键字，是一种同步锁。它修饰的对象有�
 3. Synchronized 会自动释放锁，Lock 必须手动释放锁
 4. Synchronized 非公平锁 其他线程会死等
 5. Synchronized 适合锁少量的代码同步问题，Lock 适合锁大量的同步代码
+
+### 3.5 公平锁和非公平锁
+
+- **公平锁**
+
+  多个线程按照申请锁的顺序获取锁
+
+- **非公平锁**
+
+  不按照申请锁的顺序获取锁
+
+> **买票小程序Demo**
+
+```java
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class SaleTicketDemo {
+    public static void main(String[] args) {
+        Ticket ticket = new Ticket();
+
+        new Thread(() -> {
+            for (int i = 0; i < 40; i++) ticket.sale();
+        }, "a").start();
+        new Thread(() -> {
+            for (int i = 0; i < 40; i++) ticket.sale();
+        }, "b").start();
+        new Thread(() -> {
+            for (int i = 0; i < 40; i++) ticket.sale();
+        }, "c").start();
+    }
+}
+
+class Ticket {
+    private int ticketNum = 30;
+    private Lock lock = new ReentrantLock(true);    // 无参数默认非公平锁
+
+    public void sale() {
+        lock.lock();
+        try {
+            if (this.ticketNum > 0) {
+                System.out.println(Thread.currentThread().getName() + "购得第" + (ticketNum--) + "张票，剩余" + ticketNum + "张");
+            }
+            // 增加错误发生的概率
+            Thread.sleep(10);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+```
+
