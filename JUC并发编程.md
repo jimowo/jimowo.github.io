@@ -855,4 +855,144 @@ class Ticket {
   > 1. 通过`win+r`打开运行，输入`jconsole`打开java控制台
   > 2. ![image-20230605144910144](./JUC并发编程.assets/image-20230605144910144.png)
 
-  
+
+## 4 中断机制
+
+### 4.1 线程中断机制
+
+#### 4.1.1 什么是中断机制
+
+首先，一个线程不应该由其他线程来中断或停止，所以`Thread. stop, Thread.suspend, Thread.resume`这些方法都被废弃了
+
+其次，java提供了一个停止线程的协商机制---中断，中断需要程序员自己实现
+
+若要中断一个线程，首先调用`interupt`方法，此时线程中断标志位被置为1，应该在该线程内部实现一个判断`interupted`方法是否已被中断，然后自行了断。
+
+#### 4.1.2 面试题
+
+>**如何停止中断运行中的线程**
+
+```java
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public class InterruptDemo {
+
+    static volatile boolean isStop = false;
+
+    public static void main(String[] args) {
+
+        ExecutorService pool = Executors.newFixedThreadPool(5);
+
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            System.out.println(Thread.currentThread().getName() + "----start");
+            while (true) {
+                if (isStop) {
+                    System.out.println(Thread.currentThread().getName() + "结束");
+                    break;
+                }
+                System.out.println("hello volatile");
+            }
+        }, pool);
+
+        CompletableFuture<Void> future2 = CompletableFuture.runAsync(() -> {
+            System.out.println(Thread.currentThread().getName() + "----start");
+            // 延迟3秒后 停止上面的线程
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(Thread.currentThread().getName() + "申请停止线程");
+            isStop = true;
+        }, pool);
+    }
+}
+```
+
+```java
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+public class InterruptDemo {
+
+    // 使用atomic布尔值同样可以
+    static AtomicBoolean aBoolean = new AtomicBoolean(false);
+
+    public static void main(String[] args) {
+
+        ExecutorService pool = Executors.newFixedThreadPool(5);
+
+        CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+            System.out.println(Thread.currentThread().getName() + "----start");
+            while (true) {
+                if (aBoolean.get()) {
+                    System.out.println(Thread.currentThread().getName() + "结束");
+                    break;
+                }
+                System.out.println("hello atomic");
+            }
+            return;
+        }, pool);
+
+        CompletableFuture<Void> future2 = CompletableFuture.runAsync(() -> {
+            System.out.println(Thread.currentThread().getName() + "----start");
+            // 延迟3秒后 停止上面的线程
+            try {
+                TimeUnit.SECONDS.sleep(3);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(Thread.currentThread().getName() + "申请停止线程");
+            aBoolean.set(true);
+            return;
+        }, pool);
+    }
+}
+```
+
+```java
+import java.util.concurrent.TimeUnit;
+
+public class InterruptDemo {
+
+    public static void main(String[] args) {
+
+        // 判断中断标志位是否置1
+        Thread thread = new Thread(() -> {
+            System.out.println(Thread.currentThread().getName() + "----start");
+            while (true) {
+                if (Thread.currentThread().isInterrupted()) {
+                    System.out.println(Thread.currentThread().getName() + "结束");
+                    break;
+                }
+                System.out.println("hello atomic");
+            }
+            return;
+        }, "thread1");
+        thread.start();
+
+        new Thread(() -> {
+            System.out.println(Thread.currentThread().getName() + "----start");
+            // 延迟3秒后 停止上面的线程
+            try {
+                TimeUnit.SECONDS.sleep(3);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(Thread.currentThread().getName() + "申请停止线程");
+            thread.interrupt();
+            return;
+        }, "thread2").start();
+    }
+}
+```
+
+> 2
+
+> 3
