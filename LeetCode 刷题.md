@@ -3125,6 +3125,76 @@ class Solution {
 }
 ```
 
+### 22 括号生成
+
+数字 `n` 代表生成括号的对数，请你设计一个函数，用于能够生成所有可能的并且 **有效的** 括号组合。
+
+**示例 1：**
+
+```
+输入：n = 3
+输出：["((()))","(()())","(())()","()(())","()()()"]
+```
+
+**示例 2：**
+
+```
+输入：n = 1
+输出：["()"]
+```
+
+**方法**：回溯算法 回溯的index为左括号和右括号的剩余个数
+
+```java
+class Solution {
+
+    public List<String> generateParenthesis(int n) {
+        // 左右括号数量应该相同
+        // 从左往右添加括号 保证每个右括号都有一个左括号对应 即左括号的数量一定要大于右括号
+        List<String> res = new ArrayList<>();
+        StringBuilder path = new StringBuilder();
+        int left = n, right = n;
+        backtrack(left, right, res, path);
+        return res;
+    }
+
+    /**
+     * 
+     * @param l    左括号剩余
+     * @param r    右括号剩余
+     * @param res
+     * @param path
+     */
+    void backtrack(int l, int r, List<String> res, StringBuilder path) {
+        // 判断结束
+        if (l == 0 && r == 0) {
+            // 左右括号都用完时结束回溯
+            res.add(path.toString());
+            return;
+        }
+        // 剪枝
+        if (l > r) {
+            return;
+        }
+        // 递归
+        // 1. 添加左括号
+        if (l > 0) {
+            path.append('(');
+            backtrack(l - 1, r, res, path);
+            // 回溯撤销
+            path.deleteCharAt(path.length() - 1);
+        }
+        // 2. 添加右括号
+        if (r > 0) {
+            path.append(')');
+            backtrack(l, r - 1, res, path);
+            // 回溯撤销
+            path.deleteCharAt(path.length() - 1);
+        }
+    }
+}
+```
+
 
 
 ## 7 动态规划
