@@ -35,6 +35,7 @@ export default defineUserConfig({
             'MyBatis笔记.md',
             '微服务SpringCloud笔记.md',
             '设计模式笔记.md',
+            'C++补完计划.md',
             'LeetCode 刷题.md',
             'APPENDIX.md',
         ],
