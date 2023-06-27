@@ -993,6 +993,107 @@ public class InterruptDemo {
 }
 ```
 
-> 2
+## 5 LockSupport
 
-> 3
+### 5.1 介绍
+
+LockSupport用于创建锁和其他同步类的基本线程阻塞原语，就是对线程等待唤醒机制的优化
+
+`park()`阻塞线程
+
+`unpark()`解除阻塞
+
+### 5.2 等待唤醒线程的三种方法
+
+1. 使用Object中的wait()方法让线程等待，使用Object中的notify()方法唤醒线程
+
+   ```java
+   public class LockSupportDemo {
+       public static void main(String[] args) {
+           Object objectLock = new Object();
+   
+           new Thread(() -> {
+               synchronized (objectLock) {
+                   System.out.println(Thread.currentThread().getName() + "\t ----come in");
+                   try {
+                       objectLock.wait();
+                   } catch (InterruptedException e) {
+                       e.printStackTrace();
+                   }
+                   System.out.println(Thread.currentThread().getName() + "\t ----被唤醒");
+               }
+           }, "t1").start();
+   
+           new Thread(() -> {
+               synchronized (objectLock) {
+                   System.out.println(Thread.currentThread().getName() + "\t ----come in");
+                   objectLock.notify();
+                   System.out.println(Thread.currentThread().getName() + "\t ----发出通知");
+               }
+           }, "t2").start();
+       }
+   }
+   ```
+
+2. 使用JUC包中的Condition的await()方法让线程等待，使用signal()方法唤醒线程
+
+   ```java
+   public class LockSupportDemo {
+       public static void main(String[] args) {
+   
+           Lock lock = new ReentrantLock();
+           Condition condition = lock.newCondition();
+   
+           new Thread(() -> {
+               lock.lock();
+               System.out.println(Thread.currentThread().getName() + "\t ----come in");
+               try {
+                   condition.await();
+                   System.out.println(Thread.currentThread().getName() + "\t ----被唤醒");
+               } catch (InterruptedException e) {
+                   e.printStackTrace();
+               } finally {
+                   lock.unlock();
+               }
+           }, "t1").start();
+   
+           new Thread(() -> {
+               lock.lock();
+               System.out.println(Thread.currentThread().getName() + "\t ----come in");
+               try {
+                   condition.signal();
+                   System.out.println(Thread.currentThread().getName() + "\t ----发出通知");
+               } catch (Exception e) {
+                   e.printStackTrace();
+               } finally {
+                   lock.unlock();
+               }
+           }, "t2").start();
+       }
+   }
+   ```
+
+3. LockSupport类park()和unpark()
+
+   ```java
+   public class LockSupportDemo {
+       public static void main(String[] args) {
+   
+           Thread t1 = new Thread(() -> {
+               System.out.println(Thread.currentThread().getName() + "\t ----come in");
+               LockSupport.park();
+               System.out.println(Thread.currentThread().getName() + "\t ----被唤醒");
+           }, "t1");
+           t1.start();
+   
+           new Thread(() -> {
+               System.out.println(Thread.currentThread().getName() + "\t ----come in");
+               LockSupport.unpark(t1);
+               System.out.println(Thread.currentThread().getName() + "\t ----发出通知");
+           }, "t2").start();
+       }
+   }
+   ```
+
+   **支持先唤醒后等待 **park方法消耗许可证 unpark方法增加凭证 同一时间最多只有一个凭证累加无效
+
