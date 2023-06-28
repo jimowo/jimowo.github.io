@@ -1146,3 +1146,113 @@ JMM规定所有变量都存储在主内存中，每条线程还有自己的工�
 ### 6.6 JMM规范下 多线程先行发生原则之happens-before
 
 在JMM中，如果一个操作执行的结果需要对另一个操作可见性，或者代码重排序，那么这两个操作之间必须存在happens-before(先行发生)原则。
+
+#### 6.6.1 次序规则
+
+写后读
+
+#### 6.6.2 锁定规则
+
+一个unlock操作先行发生于lock之后
+
+#### 6.6.3 volatile变量规则
+
+对一个volatile变量的写操作先行发生于后面对这个变量的读操作，前面的写对后面的读是可见的
+
+#### 6.6.4 传递规则
+
+如果操作A先行发生于操作B，而操作B又先行发生于操作C，则可以得出操作A先行发生于操作C
+
+#### 6.6.5 线程启动规则
+
+Thread对象的start()方法先行发生于此线程的每一个动作
+
+#### 6.6.6 线程中断规则
+
+先用interupt()方法调用先行发生于interrupted()之前
+
+#### 6.6.7 线程终止规则
+
+线程中的所有操作都先行发生于对此线程的终止检测，isAlive()检测线程是否终止执行
+
+#### 6.6.8 对象终结规则
+
+一个对象的初始化完成(构造函数执行结束)，先行发生于它的finalize()方法的开始
+
+## 7 Volatile与JMM
+
+### 7.1 内存屏障
+
+内存屏障是一类同步屏障指令，是CPU或编译器在对内存随机访问的操作中的一个同步点，使得此点之前的所有独写操作都执行后才可以开始执行此点之后的操作。
+
+Java内存模型的排序规则会要求Java编译器在生成JVM指令时插入特定的内存屏障指令，通过这些内存屏障指令，volatile实现了Java内存模型中的可见性和有序性，但volatile无法保证原子性。
+
+### 7.2 Volatile保证可见性
+
+当两个线程共用一个共享变量时，如果其中一个线程修改了这个共享变量的值。但是由于另外一个线程在自己的工作内存中已经保留了一份该共享变量的副本，因此它无法感知该变量的值已经被修改
+
+```java
+public class VolatileDemo {
+
+    private static boolean ready;
+
+    public static class MyThread extends Thread {
+        @Override
+        public void run() {
+            System.out.println("MyThread is running...");
+            while (!ready) ; // 如果ready为false，则死循环
+            System.out.println("MyThread is end");
+        }
+    }
+
+
+    public static void main(String[] args) throws InterruptedException {
+        new MyThread().start();
+        Thread.sleep(1000);
+        ready = true;
+        System.out.println("ready = " + ready);
+        Thread.sleep(5000);
+        System.out.println("main thread is end.");
+    }
+
+}
+
+```
+
+> 上面这个例子子线程就感知不到ready的变化，当把ready改为Volatile关键字后就能够感知
+
+### 7.3 Volatile保证有序性
+
+编译器为了优化程序性能，可能会在编译时对字节码指令进行重排序。重排序后的指令在单线程中运行时没有问题的，但是如果在多线程中，重排序后的代码则可能会出现问题。因此，一般在多线程并发情况下我们都应该禁止指令重排序的优化。而volatile关键字就可以禁止编译器对字节码进行重排序。
+
+```java
+public class DoubleCheckLock {
+
+    private volatile static DoubleCheckLock instance;
+
+    private DoubleCheckLock(){}
+
+    public static DoubleCheckLock getInstance(){
+
+        //第一次检测
+        if (instance==null){
+            //同步
+            synchronized (DoubleCheckLock.class){
+                if (instance == null){
+                    //多线程环境下可能会出现问题的地方
+                    instance = new DoubleCheckLock();
+                }
+            }
+        }
+        return instance;
+    }
+}
+
+
+```
+
+> 上面是一个经典的例子 双重校验锁
+
+### 7.4 Volatile不能保证原子性
+
+对于原子操作，volatile关键字是无能为力的。如果需要保证原子操作，则需要使用synchronized关键字、Lock锁 或者Atom相关类来确保操作的原子性。
