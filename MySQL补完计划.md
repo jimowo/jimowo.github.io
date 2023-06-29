@@ -51,4 +51,4 @@ Result table:
 链接：https://leetcode.cn/problems/game-play-analysis-iv
 ```
 
-使用`select player_id, Date(min(event_date+1)), INTERVAL 1 DAY) from Activity group by player_id`来查出第二天登录表时，`Date(min(event_date+1))`对于月末的日期的加减会有问题
+使用`select player_id, Date(min(event_date+1)), INTERVAL 1 DAY) from Activity group by player_id`来查出第二天登录表时，`Date(min(event_date+1))`对于月末的日期的加减会有问题，使用函数`DATE_ADD(min(event_date)`就不会有这种问题
