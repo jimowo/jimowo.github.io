@@ -1256,3 +1256,173 @@ public class DoubleCheckLock {
 ### 7.4 Volatile不能保证原子性
 
 对于原子操作，volatile关键字是无能为力的。如果需要保证原子操作，则需要使用synchronized关键字、Lock锁 或者Atom相关类来确保操作的原子性。
+
+## 8 CAS机制
+
+### 8.1 CAS是什么 解决了什么问题
+
+- **没有CAS时怎么保证数据的原子性**
+
+  写入共享数据时 加锁保证原子性
+
+- **使用CAS后**
+
+  使用原子类AtomicInteger
+
+- **悲观锁与乐观锁**（阻塞与非阻塞）
+
+  悲观锁认为更新数据时，大概率会有其他线程来争抢，所以第一个获取到资源的线程会将资源锁定起来，即其他没有获取到资源的线程会阻塞。**synchronized就是java中悲观锁的典型实现**
+
+  乐观锁认为不会有线程来争抢，所以更新数据的时候不会对共享数据加锁。但是在正式更新数据之前会检查数据是否被其他线程改变过，如果未被其他线程改变过就将共享变量更新成最新值，如果发现共享变量已经被其他线程更新过了，就重试，直到成功为止。**CAS机制就是乐观锁的典型实现。**
+
+- **CAS是什么**
+
+  compare and swap 比较并交换
+
+  包含三个操作数--内存位置、预期原值、更新值
+
+  执行CAS操作时（写入），将内存位置的值与预期原值比较，如果相匹配，那么处理器会自动将该位置值更新为新值；如果不匹配，处理器不做任何操作，多个线程同时执行CAS操作只有一个会成功
+
+- **CAS底层原理**
+
+  非阻塞原子性操作，通过硬件保证了CAS的原子性。所以效率更高，且更可靠。
+
+  底层为一条CPU原子指令（cmpxchg指令），Java提供的CAS操作类--Unsafe
+
+### 8.2 Unsafe类
+
+CAS核心类，提供操作特定内存数据的方法
+
+调用Unsafe类的CAS方法，JVM会编译出汇编指令，且这是一条CPU原子指令，执行是连续的，不会导致数据不一致问题。
+
+### 8.3 AtomicReference类（对象的原子操作类）
+
+1. AtomicReference和AtomicInteger非常类似，不同之处就在于AtomicInteger是对整数的封装，而AtomicReference则对应普通的对象引用。也就是它可以保证你在修改对象引用时的线程安全性。
+2. AtomicReference是作用是对”对象”进行原子操作。 提供了一种读和写都是原子性的对象引用变量。原子意味着多个线程试图改变同一个AtomicReference(例如比较和交换操作)将不会使得AtomicReference处于不一致的状态。
+
+```java
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.atomic.AtomicReference;
+
+@AllArgsConstructor
+@Data
+class User {
+    String name;
+    int age;
+}
+
+public class AtomicDemo {
+
+    @Test
+    public void testAtomicReference() {
+        AtomicReference<User> atomicReference = new AtomicReference<>();
+
+        User z3 = new User("z3", 22);
+        User l4 = new User("l4", 23);
+
+        atomicReference.set(z3);
+
+        System.out.println(atomicReference.compareAndSet(z3, l4));
+        System.out.println(atomicReference.get().toString());
+    }
+}
+```
+
+### 8.4 CAS手写自旋锁
+
+```java
+/**
+ * 实现一个自旋锁：循环获取锁不会阻塞
+ * A线程先进来调用lock方法锁5秒钟，B随后进来发现当前线程持有锁，自旋等待
+ */
+class SpinLockDemo {
+    AtomicReference<Thread> atomicReference = new AtomicReference<>();
+
+    public void lock() {
+        Thread thread = Thread.currentThread();
+        System.out.println(Thread.currentThread().getName() + "\t ----come in");
+        while (!atomicReference.compareAndSet(null, thread)) {
+        }
+        System.out.println(Thread.currentThread().getName() + "\t ----get lock");
+    }
+
+    public void unlock() {
+        Thread thread = Thread.currentThread();
+        atomicReference.compareAndSet(thread, null);
+        System.out.println(Thread.currentThread().getName() + "\t ----unlock");
+    }
+    
+    @Test
+    public void testSpinLockDemo() {
+        SpinLockDemo demo = new SpinLockDemo();
+
+        new Thread(() -> {
+            demo.lock();
+            try {
+                TimeUnit.SECONDS.sleep(5);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            demo.unlock();
+        }, "A").start();
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        new Thread(() -> {
+            demo.lock();
+            demo.unlock();
+        }, "B").start();
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+### 8.5 CAS的缺点
+
+**1. ABA问题**
+ABA问题：CAS在操作的时候会检查变量的值是否被更改过，如果没有则更新值，但是带来一个问题，最开始的值是A，接着变成B，最后又变成了A。经过检查这个值确实没有修改过，因为最后的值还是A，但是实际上这个值确实已经被修改过了。为了解决这个问题，在每次进行操作的时候加上一个版本号，每次操作的就是两个值，一个版本号和某个值，A——>B——>A问题就变成了1A——>2B——>3A。在jdk中提供了AtomicStampedReference类解决ABA问题，用Pair这个内部类实现，包含两个属性，分别代表版本号和引用，在compareAndSet中先对当前引用进行检查，再对版本号标志进行检查，只有全部相等才更新值。
+
+**2. 可能会消耗较高的CPU**
+看起来CAS比锁的效率高，从阻塞机制变成了非阻塞机制，减少了线程之间等待的时间。每个方法不能绝对的比另一个好，在线程之间竞争程度大的时候，如果使用CAS，每次都有很多的线程在竞争，也就是说CAS机制不能更新成功。这种情况下CAS机制会一直重试，这样就会比较耗费CPU。因此可以看出，如果线程之间竞争程度小，使用CAS是一个很好的选择；但是如果竞争很大，使用锁可能是个更好的选择。在并发量非常高的环境中，如果仍然想通过原子类来更新的话，可以使用AtomicLong的替代类：LongAdder。
+
+**3. 不能保证代码块的原子性**
+Java中的CAS机制只能保证共享变量操作的原子性，而不能保证代码块的原子性。
+
+### 8.6 缺点改进
+
+1. **改进ABA问题**
+
+   AtomicStampedReference版本号 时间戳
+
+   ```java
+   @Data
+   @AllArgsConstructor
+   class Book {
+       private int id;
+       private String name;
+   }
+   
+   public class ABADemo {
+       public static void main(String[] args) {
+           Book jdk = new Book(1, "jdk");
+   
+           AtomicStampedReference<Book> stampedReference = new AtomicStampedReference<>(jdk, 1);
+           System.out.println(stampedReference.getReference() + "\t" + stampedReference.getStamp());
+   
+           Book mysql = new Book(1, "mysql");
+           boolean b = stampedReference.compareAndSet(jdk, mysql, stampedReference.getStamp(), stampedReference.getStamp() + 1);
+           System.out.println(b + "\t" + stampedReference.getReference() + "\t" + stampedReference.getStamp());
+       }
+   }
+   ```
+
+   
