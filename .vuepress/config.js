@@ -36,6 +36,7 @@ export default defineUserConfig({
             '微服务SpringCloud笔记.md',
             '设计模式笔记.md',
             'C++补完计划.md',
+            'MySQL补完计划.md',
             'LeetCode 刷题.md',
             'APPENDIX.md',
         ],
