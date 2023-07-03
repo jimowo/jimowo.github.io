@@ -38,6 +38,7 @@ export default defineUserConfig({
             'C++补完计划.md',
             'MySQL补完计划.md',
             'LeetCode 刷题.md',
+            '朝花夕拾.md',
             'APPENDIX.md',
         ],
     }),
