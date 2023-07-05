@@ -1425,4 +1425,144 @@ Java中的CAS机制只能保证共享变量操作的原子性，而不能保证�
    }
    ```
 
-   
+
+## 10 ThreadLocal
+
+### 10.1 问题
+
+1. ThreadLocal中ThreadlocalMap的数据结构和关系?
+2. ThreadLocal的key是弱引用，这是为什么?
+3. ThreadLocal内存泄露问题你知道吗?
+4. ThreadLocal中最后为什么要加remove方法?
+
+### 10.2 ThreadLocal是什么
+
+ThreadLocal提供线程局部变量。这些变量与正常的变量不同，因为每一个线程访问ThreadLocal实例时，都有一个自己的副本（JMM）。
+
+ThreadLocal的目的是希望将状态（用户ID 事务ID）与各自的线程相关联。
+
+### 10.3 API与调用
+
+| 变量和类型                  | 方法                                          | 描述                                         |
+| :-------------------------- | :-------------------------------------------- | :------------------------------------------- |
+| `T`                         | `get()`                                       | 返回当前线程的此线程局部变量副本中的值。     |
+| `protected T`               | `initialValue()`                              | 返回此线程局部变量的当前线程的“初始值”。     |
+| `void`                      | `remove()`                                    | 删除此线程局部变量的当前线程值。             |
+| `void`                      | `set(T value)`                                | 将此线程局部变量的当前线程副本设置为指定值。 |
+| `static <S> ThreadLocal<S>` | `withInitial(Supplier<? extends S> supplier)` | 创建一个线程局部变量。                       |
+
+```java
+public static void main(String[] args) {
+    ThreadLocal<Integer> threadLocal = new ThreadLocal<>();
+
+    new Thread(() -> {
+        threadLocal.set(10);
+        try {
+            Thread.sleep(1000);
+            System.out.println(Thread.currentThread().getName() + " value = " + threadLocal.get());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }).start();
+
+    try {
+        Thread.sleep(1000);
+        System.out.println(Thread.currentThread().getName() + " value = " + threadLocal.get());
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+}
+```
+
+结果
+
+```
+Thread-0 value = 10
+main value = null
+```
+
+可以看到，我们在子线程中通过ThreadLocal存储了一个10，则子线程中可以取到这个值。而主线程中取到的却是null。这意味着通过某个线程通过ThreadLocal存储的数据，只有在这个线程中才能访问的到。
+
+### 10.4 ThreadLocal的实现原理
+
+#### 10.4.1 set方法
+
+```java
+public void set(T value) {
+    // 获取当前线程
+    Thread t = Thread.currentThread();
+    // 获取线程中的ThreadLocalMap
+    ThreadLocalMap map = getMap(t);
+    if (map != null) {
+        // 将值存储到ThreadLocalMap中
+        map.set(this, value);
+    } else {
+        // 创建ThreadLocalMap，并存储值
+        createMap(t, value);
+    }
+}
+void createMap(Thread t, T firstValue) {
+    // 实例化当前线程中的ThreadLocalMap
+    t.threadLocals = new ThreadLocalMap(this, firstValue);
+}
+```
+
+上述代码首先获取到了当前线程，然后从当前线程中获取ThreadLocalMap，**ThreadLocalMap**是一个存储K-V的集合，我们后边分析。如果此时ThreadLocalMap不为空，那么就通过ThreadLocalMap的set方法将值存储到当前线程对应的ThreadLocalMap中。如果ThreadLocalMap为空，那么就创建ThreadLcoalMap，然后将值存储到ThreadLocalMap中。并且，这里我们注意到ThreadLocalMap的**key**是当前的ThreadLocal。
+
+#### 10.4.2 get方法
+
+```java
+public T get() {
+    // 获取当前线程
+    Thread t = Thread.currentThread();
+    // 获取当前线程对应的ThreadLocalMap
+    ThreadLocalMap map = getMap(t);
+    if (map != null) {
+        // 从ThreadLocalMap中取出值
+        ThreadLocalMap.Entry e = map.getEntry(this);
+        if (e != null) {
+            @SuppressWarnings("unchecked")
+            T result = (T)e.value;
+            return result;
+        }
+    }
+    // 如果值为空则返回初始值
+    return setInitialValue();
+}
+// 为ThreadLocal设置初始值
+private T setInitialValue() {
+    // 初始值为null
+    T value = initialValue();
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    if (map != null) {
+        map.set(this, value);
+    } else {
+        // 创建ThreadLocalMap
+        createMap(t, value);
+    }
+    if (this instanceof TerminatingThreadLocal) {
+        TerminatingThreadLocal.register((TerminatingThreadLocal<?>) this);
+    }
+    return value;
+}
+// 初始值为空
+protected T initialValue() {
+    return null;
+}
+```
+
+get方法依然是先获取到当前线程，然后拿到当前线程的ThreadLocalMap，并通过ThreadLocalMap的getEntry方法将这个ThreadLocal作为key来取值。如果ThreadLocalMap为null，则会通过setInitialValue方法返回了一个null值。
+
+#### 10.4.3 ThreadLocalMap（关键）
+
+ThreadLocalMap是一个存储K-V类型的数据结构，并且Thread类中维护了一个ThreadLocalMap的成员变量
+
+```java
+public class Thread implements Runnable {
+
+    ThreadLocal.ThreadLocalMap threadLocals = null;
+    // ...
+}
+```
+
