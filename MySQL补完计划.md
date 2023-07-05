@@ -52,3 +52,23 @@ Result table:
 ```
 
 使用`select player_id, Date(min(event_date+1)), INTERVAL 1 DAY) from Activity group by player_id`来查出第二天登录表时，`Date(min(event_date+1))`对于月末的日期的加减会有问题，使用函数`DATE_ADD(min(event_date)`就不会有这种问题
+
+## 2 条件判断函数-CASE WHEN用法
+
+**1、简单函数**
+
+```text
+CASE 字段 WHEN 预期值 THEN 结果1 ELSE 结果2 END
+```
+
+**2、条件表达式**
+
+CASE的简单函数使用简便，但无法应对较为复杂的场景，这就需要用到条件表达式了，其语法结构如下：
+
+```text
+CASE 
+	WHEN condition THEN result1  ELSE result2
+END
+```
+
+解释一下，语句中的condition是条件判断，如果该判断结果为true，那么CASE语句将返回result，否则返回result2，如果没有ELSE，则返回null。CASE与END之间可以有多个WHEN…THEN…ELSE语句。END表示CASE语句结束。
