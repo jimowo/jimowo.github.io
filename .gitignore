@@ -6,3 +6,8 @@ _book
 .vuepress/.temp
 tmp
 .idea
+
+node_modules/
+docs/.vuepress/.cache/
+docs/.vuepress/.temp/
+docs/.vuepress/dist/
