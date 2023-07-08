@@ -107,7 +107,7 @@ public enum State {
 
 #### 2.3.1 FutureTask类的继承实现关系
 
-![image-20230526102154164](./JUC并发编程.assets/image-20230526102154164.png) 
+![image-20230526102154164](./img/JUC并发编程.assets/image-20230526102154164.png) 
 
 #### 2.3.2 FutureTask使用例子
 
