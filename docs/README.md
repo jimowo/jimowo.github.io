@@ -2,47 +2,27 @@
 home: true
 layout: BlogHome
 icon: home
-title: Blog Home
-heroImage: /logo.svg
-heroText: The name of your blog
-tagline: You can put your slogan here
+title: 博客主页
+# heroImage: /logo.svg
+# heroText: Jimowo
+bgImage: /bg1.png
 heroFullScreen: true
+tagline: 欲买桂花同载酒，终不似，少年游
 projects:
   - icon: project
-    name: project name
-    desc: project detailed description
-    link: https://your.project.link
+    name: 运动平台后端
+    desc: SSM项目
+    link: https://github.com/jimowo/health-server
+
+  - icon: project
+    name: 运动平台前端
+    desc: Vue项目
+    link: https://github.com/jimowo/health-vue
 
   - icon: link
-    name: link name
-    desc: link detailed description
-    link: https://link.address
+    name: 博客模板
+    desc: VuePress模板 theme-hope
+    link: https://theme-hope.vuejs.press/
 
-  - icon: book
-    name: book name
-    desc: Detailed description of the book
-    link: https://link.to.your.book
-
-  - icon: article
-    name: article name
-    desc: Detailed description of the article
-    link: https://link.to.your.article
-
-  - icon: friend
-    name: friend name
-    desc: Detailed description of friend
-    link: https://link.to.your.friend
-
-  - icon: /logo.svg
-    name: custom item
-    desc: Detailed description of this custom item
-    link: https://link.to.your.friend
-
-footer: customize your footer text
+footer: 有问题请邮箱联系
 ---
-
-This is a blog home page demo.
-
-To use this layout, you should set both `layout: BlogHome` and `home: true` in the page front matter.
-
-For related configuration docs, please see [blog homepage](https://theme-hope.vuejs.press/guide/blog/home/).

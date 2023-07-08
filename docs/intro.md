@@ -3,6 +3,6 @@ icon: circle-info
 cover: /assets/images/cover3.jpg
 ---
 
-# Intro Page
+# 介绍页
 
-Place your introduction and profile here.
+此博客用来记录看过的书，做过的项目
