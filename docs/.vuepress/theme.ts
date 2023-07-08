@@ -13,7 +13,7 @@ export default hopeTheme({
     url: "https://jimowo.github.io",
   },
 
-  iconAssets: "fontawesome-with-brands",
+  iconAssets: "iconfont",
 
   // logo: "/logo.svg",
 

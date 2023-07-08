@@ -1,3 +1,15 @@
+---
+title: MySQL补完计划
+author: jimowo
+icon: mysql
+date: 2022-08-08
+order: 1
+category:
+  - 数据库
+tag:
+  - MySQL
+---
+
 # MySQL补完计划
 
 ## 1 Date数据类型的加减

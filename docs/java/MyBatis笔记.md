@@ -1,3 +1,20 @@
+---
+title: MyBatis笔记
+author: jimowo
+icon: java
+date: 2023-06-09
+order: 5
+category:
+  - Java
+  - 数据库
+  - MyBatis
+tag:
+  - Java
+  - MySQL
+  - 数据库
+  - MyBatis
+---
+
 # MyBatis 笔记
 
 ## 1 MyBatis 简介

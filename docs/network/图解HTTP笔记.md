@@ -1,3 +1,15 @@
+---
+title: HTTP笔记
+author: jimowo
+icon: network
+date: 2022-09-08
+order: 1
+category:
+  - 计算机网络
+tag:
+  - HTTP
+---
+
 # 图解HTTP笔记
 
 ## 第一章 了解Web及网络基础

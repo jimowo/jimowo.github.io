@@ -1,3 +1,16 @@
+---
+title: LeetCode刷题
+author: jimowo
+icon: rank
+date: 2022-07-08
+order: 1
+category:
+  - 算法
+tag:
+  - 刷题
+  - 排序
+---
+
 # LeetCode 刷题
 
 <u>参考[代码随想录学习](https://programmercarl.com/)</u>

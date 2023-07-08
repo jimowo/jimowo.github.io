@@ -1,6 +1,13 @@
 ---
-typora-copy-images-to: java笔记图片
-typora-root-url: java笔记图片
+title: Java基础
+author: jimowo
+icon: java
+date: 2022-01-09
+order: 1
+category:
+  - Java
+tag:
+  - Java
 ---
 
 # Java基础笔记

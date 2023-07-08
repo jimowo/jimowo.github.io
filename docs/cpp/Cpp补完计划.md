@@ -1,5 +1,7 @@
 ---
-icon: pen-to-square
+title: Cpp补完计划
+author: jimowo
+icon: c
 date: 2023-01-09
 category:
   - C++
