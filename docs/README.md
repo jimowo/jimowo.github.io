@@ -5,7 +5,7 @@ icon: home
 title: 博客主页
 # heroImage: /logo.svg
 # heroText: Jimowo
-bgImage: /bg2.png
+bgImage: /bg2.jpg
 heroFullScreen: true
 tagline: 欲买桂花同载酒，终不似，少年游
 projects:
