@@ -84,3 +84,36 @@ END
 ```
 
 解释一下，语句中的condition是条件判断，如果该判断结果为true，那么CASE语句将返回result，否则返回result2，如果没有ELSE，则返回null。CASE与END之间可以有多个WHEN…THEN…ELSE语句。END表示CASE语句结束。
+
+## 3 GROUP BY 多字段查询
+
+参考[1050. 合作过至少三次的演员和导演](https://leetcode.cn/problems/actors-and-directors-who-cooperated-at-least-three-times/)
+
+写一条SQL查询语句获取合作过至少三次的演员和导演的 id 对 `(actor_id, director_id)`
+
+```
+ActorDirector 表：
++-------------+-------------+-------------+
+| actor_id    | director_id | timestamp   |
++-------------+-------------+-------------+
+| 1           | 1           | 0           |
+| 1           | 1           | 1           |
+| 1           | 1           | 2           |
+| 1           | 2           | 3           |
+| 1           | 2           | 4           |
+| 2           | 1           | 5           |
+| 2           | 1           | 6           |
++-------------+-------------+-------------+
+
+Result 表：
++-------------+-------------+
+| actor_id    | director_id |
++-------------+-------------+
+| 1           | 1           |
++-------------+-------------+
+唯一的 id 对是 (1, 1)，他们恰好合作了 3 次。
+```
+
+因为需要根据 actor_id, director_id 来分组，两种处理方法，一个是直接使用`group by`，另一种是使用`CONCAT_WS(spector, str1, str2)`，把actor_id, director_id合成一个字段来查询
+
+> CONCAT_WS 和普通的CONCAT 函数的区别是，前者可以在拼接的字符间添加连接符，后者不能添加会导致拼接的字符串无法表示唯一的对应关系（比如 1 和11 拼接为111，而111 还可以表示11 1）
