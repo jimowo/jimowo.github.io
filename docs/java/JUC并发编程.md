@@ -195,7 +195,7 @@ CompletableFuture提供了一种观察者模式类似的机制，可以让任务
 
 > **CompletableFuture继承实现关系**
 
-![image-20230526173657051](./JUC并发编程.assets/image-20230526173657051.png) 
+![image-20230526173657051](./img/JUC并发编程.assets/image-20230526173657051.png) 
 
 - **常用方法**
 
@@ -853,7 +853,7 @@ class Ticket {
   > 使用jconsole
   >
   > 1. 通过`win+r`打开运行，输入`jconsole`打开java控制台
-  > 2. ![image-20230605144910144](./JUC并发编程.assets/image-20230605144910144.png)
+  > 2. ![image-20230605144910144](./img/JUC并发编程.assets/image-20230605144910144.png)
 
 
 ## 4 中断机制
