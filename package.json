@@ -3,8 +3,6 @@
   "version": "1.0.0",
   "description": "ymk-blog",
   "scripts": {
-    "dev": "vuepress dev",
-    "build": "vuepress build",
     "docs:build": "vuepress build docs",
     "docs:clean-dev": "vuepress dev docs --clean-cache",
     "docs:dev": "vuepress dev docs",
