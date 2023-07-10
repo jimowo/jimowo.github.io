@@ -1581,4 +1581,134 @@ public class Thread implements Runnable {
 }
 ```
 
-## 13 AQS
+## 13 AQS队列同步器-AbstractQueuedSynchronizer
+
+### 13.1 问题
+
+1. 什么是AQS，它有什么作用，核心思想是什么
+2. AQS独占锁和共享锁的原理，AQS提供的是公平锁还是非公平锁
+3. AQS在java中有哪些实现类
+4. AQS除了锁框架外还提供什么能力
+
+### 13.2 AQS简介
+
+`AbstractQueuedSynchronizer(AQS)`提供了一套可用于实现锁同步机制的框架，不夸张地说，`AQS`是`JUC`同步框架的基石。`AQS`通过一个`FIFO`队列维护线程同步状态，实现类只需要继承该类，并重写指定方法即可实现一套线程同步机制。
+
+`AQS`根据资源互斥级别提供了**独占和共享**两种资源访问模式；同时其定义`Condition`结构提供了`wait/signal`等待唤醒机制。在`JUC`中，诸如`ReentrantLock`、`CountDownLatch`等都基于`AQS`实现。
+
+### 13.3 AQS原理
+
+AQS是依赖内部的同步队列实现，也就是**FIFO双向队列**，如果当前线程竞争锁失败，那么AQS会把当前线程以及等待状态封装成一个**Node节点**加入到同步队列中，同时阻塞该线程，当同步状态释放时，会把首节点唤醒，使其再次尝试获取同步状态。
+
+![image-20230710214419984](./img/JUC并发编程.assets/image-20230710214419984.png)
+
+其中Node节点的结构如下：
+
+```java
+static final class Node {
+    /** 表示节点正在以共享模式等待的标记 */
+    static final Node SHARED = new Node();
+    /** 表示节点正在以独占模式等待的标记 */
+    static final Node EXCLUSIVE = null;
+
+    /** 等待状态，表示线程已取消 */
+    static final int CANCELLED =  1;
+    /** 等待状态，表示后继节点的线程需要唤醒 */
+    static final int SIGNAL    = -1;
+    /** 等待状态，表示线程正在等待条件 */
+    static final int CONDITION = -2;
+    /**
+     * 等待状态，表示下一个acquireShared操作应该无条件地传播
+     */
+    static final int PROPAGATE = -3;
+
+    /**
+     * 状态字段，只能取以下值之一：
+     *   SIGNAL:     后继节点（即将）被阻塞（通过park方法），所以当前节点必须在释放或取消时唤醒其后继节点。
+     *               为了避免竞争，acquire方法首先必须表明它们需要一个信号量，然后重试原子性的acquire操作，
+     *               在失败时进行阻塞。
+     *   CANCELLED:  由于超时或中断，此节点被取消。节点永远不会离开此状态。
+     *               特别地，带有被取消节点的线程永远不会再次被阻塞。
+     *   CONDITION:  此节点目前位于条件队列上。
+     *               它不会被用作同步队列节点，直到被转移时，此时状态将设置为0。
+     *               （此处使用该值与字段的其他用途无关，但简化了机制。）
+     *   PROPAGATE:  应该将releaseShared传播到其他节点。仅在doReleaseShared中为头节点设置，
+     *               以确保传播继续，即使其他操作已经介入。
+     *   0:          上述都不是
+     *
+     * 值按数字顺序排列，以简化使用。非负值表示节点不需要信号量。
+     * 因此，大多数代码不需要检查特定的值，只需检查符号即可。
+     *
+     * 对于普通同步节点，该字段被初始化为0；对于条件节点，该字段被初始化为CONDITION。
+     * 它使用CAS进行修改（或在可能时使用无条件的volatile写操作）。
+     */
+    volatile int waitStatus;
+
+    /**
+     * 当前节点/线程依赖的前置节点的链接，用于检查waitStatus。
+     * 在入队时分配，并在出队时清空（为了垃圾回收的目的）。
+     * 当前节点的前置节点被取消时，我们会进行短路操作以查找一个未取消的前置节点，
+     * 因为头节点永远不会被取消：节点只有在成功获取后才会成为头节点。
+     * 取消的线程永远不会成功获取，并且只有线程自己才可以取消，没有其他节点可以取消。
+     */
+    volatile Node prev;
+
+    /**
+     * 当前节点/线程释放时要唤醒的后继节点的链接。
+     * 在入队时分配，在绕过已取消的前置节点时进行调整，并在出队时清空（为了垃圾回收的目的）。
+     * 入队操作在附加之前不会为前置节点的next字段分配值，
+     * 所以看到null的next字段并不一定意味着节点位于队列末尾。
+     * 但是，如果next字段似乎是null，我们可以从尾部向前扫描prev节点进行双重检查。
+     * 已取消节点的next字段被设置为指向节点本身而不是null，以使isOnSyncQueue方法更容易处理。
+     */
+    volatile Node next;
+
+    /**
+     * 入队此节点的线程。在构造函数中初始化，并在使用后清空。
+     */
+    volatile Thread thread;
+
+    /**
+     * 链接到在条件上等待的下一个节点，或特殊值SHARED。
+     * 因为条件队列只在持有独占模式时访问，所以我们只需要一个简单的链表队列来保存正在等待条件的节点。
+     * 然后将它们转移到队列以便重新获取。由于条件只能是独占的，所以使用特殊值来表示共享模式可以节省一个字段。
+     */
+    Node nextWaiter;
+
+    /**
+     * 如果节点正在以共享模式等待，则返回true。
+     */
+    final boolean isShared() {
+        return nextWaiter == SHARED;
+    }
+
+    /**
+     * 返回前置节点，如果为null则抛出NullPointerException异常。
+     * 在前置节点不可能为null的情况下使用。可以省略null检查，但它有助于虚拟机。
+     *
+     * @return 此节点的前置节点
+     */
+    final Node predecessor() throws NullPointerException {
+        Node p = prev;
+        if (p == null)
+            throw new NullPointerException();
+        else
+            return p;
+    }
+
+    Node() {    // 用于建立初始头节点或SHARED标记
+    }
+
+    Node(Thread thread, Node mode) {     // 由addWaiter方法使用
+        this.nextWaiter = mode;
+        this.thread = thread;
+    }
+
+    Node(Thread thread, int waitStatus) { // 由Condition使用
+        this.waitStatus = waitStatus;
+        this.thread = thread;
+    }
+}
+
+```
+
