@@ -5,7 +5,7 @@ icon: home
 title: 博客主页
 heroImage: 
 heroText: 🕶️
-bgImage: /bg2.jpg
+bgImage: https://www.dmoe.cc/random.php
 heroFullScreen: true
 tagline: 你可以在这里放置你的口号与标语
 projects:
