@@ -1,5 +1,5 @@
 ---
- title: JUC并发编程
+title: JUC并发编程
 author: jimowo
 icon: java
 date: 2023-02-09
