@@ -4,7 +4,7 @@ layout: BlogHome
 icon: home
 title: 博客主页
 heroImage: 
-heroText: (・∀・(・∀・(・∀・*)
+heroText: 🕶️
 bgImage: /bg2.jpg
 heroFullScreen: true
 tagline: 你可以在这里放置你的口号与标语
