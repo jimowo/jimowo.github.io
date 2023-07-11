@@ -3,11 +3,11 @@ home: true
 layout: BlogHome
 icon: home
 title: 博客主页
-# heroImage: /logo.svg
-# heroText: Jimowo
+heroImage: 
+heroText: 欲买桂花同载酒，终不似，少年游
 bgImage: /bg2.jpg
 heroFullScreen: true
-tagline: 欲买桂花同载酒，终不似，少年游
+tagline: 你可以在这里放置你的口号与标语
 projects:
   - icon: project
     name: 运动平台后端
