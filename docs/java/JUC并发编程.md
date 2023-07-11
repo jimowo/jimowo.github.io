@@ -1712,3 +1712,65 @@ static final class Node {
 
 ```
 
+### 13.4 如何使用AQS
+
+`AQS`内部封装了队列维护逻辑，采用模版方法的模式提供实现类以下方法：
+
+```Java
+tryAcquire(int);        // 尝试获取独占锁，可获取返回true，否则false
+tryRelease(int);        // 尝试释放独占锁，可释放返回true，否则false
+tryAcquireShared(int);  // 尝试以共享方式获取锁，失败返回负数，只能获取一次返回0，否则返回个数
+tryReleaseShared(int);  // 尝试释放共享锁，可获取返回true，否则false
+isHeldExclusively();    // 判断线程是否独占资源
+```
+
+如实现类只需实现独占锁/共享锁功能，可只实现`tryAcquire/tryRelease`或`tryAcquireShared/tryReleaseShared`。虽然实现`tryAcquire/tryRelease`可自行设定逻辑，但建议使用`state`方法对`state`变量进行操作以实现同步类。
+
+```java
+/**
+ * 使用AQS模板实现一个简单的互斥锁
+ */
+class MyMutex extends AbstractQueuedSynchronizer {
+    @Override
+    protected boolean tryAcquire(int arg) {
+        return compareAndSetState(0, 1);
+    }
+
+    @Override
+    protected boolean tryRelease(int arg) {
+        return compareAndSetState(1, 0);
+    }
+}
+
+public class AQSDemo {
+    public static void main(String[] args) throws InterruptedException {
+        final MyMutex mutex = new MyMutex();
+
+        new Thread(() -> {
+            mutex.acquire(1);
+            System.out.println(Thread.currentThread().getName() + " acquire mutex");
+            try {
+                TimeUnit.SECONDS.sleep(5);
+            } catch (InterruptedException e) {
+
+            }
+            System.out.println(Thread.currentThread().getName() + " release mutex");
+            mutex.release(1);
+        }, "t1").start();
+
+        new Thread(() -> {
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException e) {
+
+            }
+
+            mutex.acquire(1);
+            System.out.println(Thread.currentThread().getName() + " acquire mutex");
+            mutex.release(1);
+            System.out.println(Thread.currentThread().getName() + " release mutex");
+        }, "t2").start();
+    }
+}
+```
+
