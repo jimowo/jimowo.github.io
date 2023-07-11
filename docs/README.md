@@ -5,7 +5,7 @@ icon: home
 title: 博客主页
 heroImage: 
 heroText: 🕶️
-bgImage: https://www.dmoe.cc/random.php
+bgImage: https://api.yimian.xyz/img?type=moe&size=1920x1080
 heroFullScreen: true
 tagline: 你可以在这里放置你的口号与标语
 projects:
