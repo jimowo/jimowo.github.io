@@ -27,7 +27,6 @@ export default defineClientConfig({
               ? `——   「 ${res.data.from} • ${res.data.from_who} 」`
               : `——   「 ${res.data.from} 」`;
             texts = content.split("");
-            console.log(texts);
             loopShow();
           }
         }, delay);
@@ -43,9 +42,6 @@ export default defineClientConfig({
         let div: HTMLDivElement | null = document.getElementById(
           "hitokoto_author"
         ) as HTMLDivElement;
-
-        console.log(span);
-        console.log(div);
 
         let index = 0;
         let del = false;
