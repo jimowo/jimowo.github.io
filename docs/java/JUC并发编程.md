@@ -1812,3 +1812,37 @@ flowchart TD
 尝试释放成功后，即从头结点开始唤醒其后继节点，如后继节点被取消，则转为从尾部开始找阻塞的节点将其唤醒。阻塞节点被唤醒后，即进入`acquireQueued`中的`for(;;)`循环开始新一轮的资源竞争。
 
 #### 13.5.4 acquireShared 和releaseShared分析
+
+`acquireShared`和`releaseShared`整体流程与独占锁类似，`tryAcquireShared`获取失败后以`Node.SHARED`挂载到队尾阻塞，直到队头节点将其唤醒。在`doAcquireShared`与独占锁不同的是，由于共享锁是可以被多个线程获取的，因此在首个阻塞节点被唤醒后，会通过`setHeadAndPropagate`传递唤醒后续的阻塞节点。
+
+进入`setHeadAndPropagate`，首先需要明确的是，该函数的传入参数`propagate`一定是非负数，接下来其唤醒主要为两个判断逻辑：
+
+- 如果`propagate > 0`，表示存在多个共享锁可以获取，可直接进行`doReleaseShared`唤醒阻塞节点。
+
+- 如果`propagate = 0`，表示仅当前节点可被唤醒，则有两种情况：
+
+  1. `h == null || h.waitStatus < 0` 
+
+     假设资源数量为2（A，B）持有，此时有两个线程（C，D）在阻塞队列等待
+
+     1）线程A释放锁，此时`doReleaseShared`先将head的ws置为0，然后unpark线程C
+
+     2）线程C尝试获取锁`tryAcquiredShared`，进入`setHeadAndPropagate`，此时线程B也释放锁，根据`doReleaseShared`因为此时的head的ws已经被置为0，所以把head的ws置为`Node.PROPAGATE=-3`
+
+     3）线程C判断`h == null || h.waitStatus < 0`，符合上述情况，新head指向C，并且因为队列中的线程D为`SHARE`共享锁，继续释放线程D
+
+  2. `(h = head) == null || h.waitStatus < 0`
+
+     假设资源数量为2（A，B）持有，此时有线程C在阻塞队列等待
+
+     1）线程A释放锁，此时`doReleaseShared`先将head的ws置为0，然后unpark线程C
+
+     2）线程C尝试获取锁`tryAcquiredShared`，进入`setHeadAndPropagate`已经`setHead`，线程D这时请求资源将D挂载到阻塞队列队尾。
+
+     3）线程B也释放锁，根据`doReleaseShared`因为此时的head的ws已经被置为0，所以把head的ws置为`Node.PROPAGATE=-3`，由于经过了`setHead`，满足`(h=head) == null`，可以继续释放线程D。
+
+### 13.6 ConditionObject（wait队列）
+
+![img](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/fb7f29f2671e4dcbaf62472e008aeb53~tplv-k3u1fbpfcp-zoom-in-crop-mark:1512:0:0:0.awebp)
+
+`ConditionObject`机制如上图，在条件队列中，`Node`采用`nextWaiter`组成单向链表，当持有锁的线程发起`condition.await`调用后，会包装为`Node`挂载到**Condition条件阻塞队列中**；当对应`condition.signal`被触发后，条件阻塞队列中的节点将被唤醒并挂载到**锁阻塞队列**中。
