@@ -1774,3 +1774,41 @@ public class AQSDemo {
 }
 ```
 
+### 13.5 AQS分析
+
+#### 13.5.1 acquire分析
+
+```mermaid
+flowchart TD
+    A(acquire) --> B[tryAcquire\n尝试获取资源]
+    B -->|false| C[addWaiter\n包装节点尾插入队列]
+    B -->|true| D(获取资源成功)
+    C --> E[acquireQueue\n线程加入队列后再次判断能否获取资源\n不能则将前驱节点ws设置为signal]
+    E -->|true| D
+    E -->|false| F(线程阻塞等待)
+```
+
+#### 13.5.2 acquireQueue分析
+
+队列中的节点循环等待前驱节点为头节点时方可获取资源
+
+```mermaid
+flowchart TD
+    A[acquireQueued] --> B{前一个节点\n是否为头节点}
+    B -->|true| C{tryAcquire}
+    C -->|true| D(获取资源成功)
+    B -->|false| E{前驱节点ws==SIGNAL}
+    E -->|false| G{ws > 0\n判断前驱节点是否被取消}
+    E -->|true| F[parkAndCheckInterrupt\n挂起线程]
+    F --> B
+    G -->|false| I[设置前驱节点ws=SIGNAL\n表示可以唤醒当前node]
+    I --> B
+    G -->|true| H[向前遍历到ws>0的节点\npred.next = node]
+    H --> B
+```
+
+#### 13.5.3 release流程分析
+
+尝试释放成功后，即从头结点开始唤醒其后继节点，如后继节点被取消，则转为从尾部开始找阻塞的节点将其唤醒。阻塞节点被唤醒后，即进入`acquireQueued`中的`for(;;)`循环开始新一轮的资源竞争。
+
+#### 13.5.4 acquireShared 和releaseShared分析
