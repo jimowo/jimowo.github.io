@@ -27,7 +27,7 @@ tag:
 3. 服务熔断 hystrix
 4. 负载均衡 ribbon
 5. 服务降级 hystrix
-6. 服务消息队列
+6. 服务消息队列 RabbitMQ、Kafka
 7. 配置管理中心 spring cloud config 
 8. 服务网关 zuul
 9. 服务监控
@@ -1143,4 +1143,119 @@ Feign 的核心原理是基于接口注解和动态代理实现远程调用，�
               maxAge: 1800	# 跨域检测有效期
   ```
 
-  
+
+## 3 Docker 入门
+
+### 3.1 什么是Docker
+
+- **项目部署问题**
+  - 大型项目运行环境要配置很多软件、依赖，node、sql、redis、消息队列等，产生了不同组件依赖的兼容性问题
+  - 开发、测试、生产的环境有差异问题，比如开发用的ubuntu，生产环境是CentOS
+- **Docker如何解决上述问题**
+  - Docker 镜像中包含完整运行环境，包含操作系统函数库，仅系统的内核，因此程序可以在任何Linux 操作系统中运行
+  - 并且将每个程序放入一个**隔离的容器**去运行，避免互相干扰
+
+### 3.2 Docker 和虚拟机的区别
+
+Docker 是将程序完整的运行环境打包，这样在任意系统中就可以运行这个程序
+
+虚拟机是在操作系统中模拟硬件设备，然后运行另一个操作系统。
+
+### 3.3 Docker 架构
+
+- **镜像和容器**
+
+  - 镜像（Image）：Docker 将程序运行的完整环境打包在一起，成为镜像
+  - 容器（Container）：镜像中的程序运行后形成的进程就是容器
+
+- **Docker 和DockerHub**
+
+  - DockerHub：是Docker 镜像的托管平台像Github
+
+- **Docker 架构**
+
+  Docker 是一个CS 架构的程序，由两部分组成
+
+  - 服务端（server）：Docker 守护进程，负责处理Docker 指令，管理镜像/容器等
+  - 客户端（client）：通过RestAPI 向Docker 服务端发送指令
+
+  ![image-20230721135022502](./img/微服务SpringCloud笔记.assets/Docker架构.png)
+
+### 3.4 安装Docker
+
+
+
+### 3.5 Docker 基本操作
+
+- **Docker 操作命令**
+  - 本地根据Dockerfile 文件，使用`docker build`构建镜像
+  - 远程使用`docker pull`从服务拉取镜像
+  - `docker images` 查看本地的镜像
+  - `docker rmi` 删除镜像
+  - `docker save`保存镜像为一个压缩包
+  - `docker load`加载压缩包
+  - `[命令] --help`可以查看命令的帮助
+- **容器相关命令**
+  - `docker run`创建容器，并进入运行状态
+  - `docker pause`容器进入暂停状态
+  - `docker unpause` 容器从暂停恢复运行状态
+  - `docker stop`容器停止
+  - `docker start`容器从停止恢复到运行状态
+
+### 3.6 容器操作
+
+- **创建运行一个Nginx容器**
+
+  `docker run --name containerName -p 80:80 -d nginx`
+
+  - --name：给容器起一个名字
+  - -p：将宿主机端口与容器端口映射，冒号左侧是宿主机端口，右侧是容器端口
+  - -d：后台运行容器
+
+- **查看容器日志**
+
+  - `docker logs`
+  - 添加-f 参数可以持续查看日志
+
+- **查看容器状态**
+
+  - `docker ps`
+
+- **进入Nginx容器，修改HTML文件内容**
+
+  1. 进入容器 `docker exec -it mn bash`
+
+     - docker exec：进入容器内部，执行一个命令
+     - -it：给当前进入的容器创建一个标准输入、输出终端，允许我们与容器交互
+     - mn：要进入的容器名称
+     - bash：进入容器后执行的命令
+
+  2. 进入Nginx的HTML所在目录 `cd usr/share/nginx/html`
+
+  3. 修改index.html 的内容
+
+     `sed -i 's#Welcome to nginx#docker 中的nginx#g' index.html`
+
+     `sed -i 's#<head>#<head><meta charset="utf-8">#g' index.html`
+
+### 3.7 数据卷操作
+
+- **数据卷**
+
+  数据卷(volume)是一个虚拟目录，指向宿主机文件系统中的某个目录
+
+- **操作数据卷**
+
+  `docker volume [COMMAND]`
+
+  - create：创建一个volume
+  - inspect：显示一个或多个volume 信息
+  - ls：列出所有的volume
+  - rm：删除volume
+  - prune：清楚未使用的数据卷
+
+- **挂载数据卷**
+
+  `docker run --name mn -p 80:80 -v html:/usr/share/nginx/html -d nginx`
+
+  - -v html:/usr/share/nginx/html：挂载目录到宿主机的数据卷html上（不存在数据卷会自动创建）
