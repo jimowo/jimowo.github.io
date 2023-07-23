@@ -1325,4 +1325,51 @@ Docker 是将程序完整的运行环境打包，这样在任意系统中就可�
   CMD [ "/tmp/app.jar" ]
   ```
 
+### 3.9 DockerCompose
+
+- **什么是DockerCompose**
+
+  - 基于Compose 文件帮助快速部署分布式应用，无需手动创建运行容器
+  - Compose 文件是一个文本文件，指令定义集群中的每个容器如何运行
+
+- **使用DockerCompose 部署微服务**
+
+  1. 编写docker-compose文件
+
+     ```yml
+     version: "3.2"
+     
+     services:
+       nacos:
+         image: nacos/nacos-server
+         environment:
+           MODE: standalone
+         ports:
+           - "8848:8848"
+       mysql:
+         image: mysql:5.7.25
+         environment:
+           MYSQL_ROOT_PASSWORD: 123
+         volumes:
+           - "$PWD/mysql/data:/var/lib/mysql"
+           - "$PWD/mysql/conf:/etc/mysql/conf.d/"
+       userservice:
+         build: ./user-service
+       orderservice:
+         build: ./order-service
+       gateway:
+         build: ./gateway
+         ports:
+           - "10010:10010"
+     
+     ```
+
+  2. 确保docker-compose 中的服务名和项目中的地址一致（localhost改成服务名称）
+
+  3. 使用Maven 打包时，把项目中每个微服务都打包成app.jar
+
+  4. 将app.jar 拷贝到服务集群项目的对应子目录中
+
+  5. 将服务集群项目上传虚拟机，使用`docker-compose up -d`部署
+
   
