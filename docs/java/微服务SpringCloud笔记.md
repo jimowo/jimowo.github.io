@@ -1259,3 +1259,70 @@ Docker 是将程序完整的运行环境打包，这样在任意系统中就可�
   `docker run --name mn -p 80:80 -v html:/usr/share/nginx/html -d nginx`
 
   - -v html:/usr/share/nginx/html：挂载目录到宿主机的数据卷html上（不存在数据卷会自动创建）
+
+### 3.8 Dockerfile 自定义镜像
+
+- **镜像结构**
+
+  从低到高
+
+  - 基础镜像（BaseImage）：系统函数库、环境、配置、文件（装系统）
+  - 层（Layer）：在Baseimage 的基础上添加安装包、程序依赖、配置，每一步的操作都是一层（装程序）
+  - 入口（Entrypoint）：镜像运行的入口，一般是启动的脚本和参数（快捷方式）
+
+- **Dockerfile**
+
+  文本文件，包含构建镜像的指令
+
+  - FROM：指定基础镜像 FROM centos:6 也可From 一个别人制作好的镜像
+  - ENV：设置环境变量 ENV key value
+  - COPY：拷贝本地文件到指定目录 COPY ./mysql-5.7.rpm /tmp
+  - RUN：执行Linux 的shell 命令 Run yum install gcc
+  - EXPOSE：指定容器运行时的监听端口
+  - ENTRYPOINT：镜像中应用的启动命令，运行时使用 ENTRYPOINT java -jar xx.jar
+
+- **案例：docker 部署一个java应用**
+
+  ```dockerfile
+  # 配置基础镜像
+  FROM ubuntu:16.04
+  # 配置环境变量
+  ENV JAVA_DIR=/usr/local
+  
+  # 拷贝jdk和java项目的包
+  COPY ./jdk8.tar.gz ${JAVA_DIR}
+  COPY ./docker-demo.jar /tmp/app.jar
+  
+  # 安装jdk
+  RUN cd ${JAVA_DIR} \
+      && tar -xf ./jdk8.tar.gz \
+      && mv ./jdk1.8.0_144 ./java8
+  
+  # 配置环境变量
+  ENV JAVA_HOME=${JAVA_DIR}/java8
+  ENV PATH=$PATH:${JAVA_HOME}/bin
+  
+  # 暴露端口
+  EXPOSE 8080
+  #入口 java应用启动命令
+  ENTRYPOINT [ "java", "-jar" ]
+  CMD [ "/tmp/app.jar" ]
+  ```
+
+  优化部署，可以将上面的dockerfile 中的jdk 安装部分单独打包，避免重复工作 `java:8-alpine`
+
+  ```dockerfile
+  # 配置基础镜像
+  FROM java:8-alpine
+  
+  # 拷贝java项目的包
+  COPY ./docker-demo.jar /tmp/app.jar
+  
+  # 暴露端口
+  EXPOSE 8080
+  #入口 java应用启动命令
+  ENTRYPOINT [ "java", "-jar" ]
+  CMD [ "/tmp/app.jar" ]
+  ```
+
+  
