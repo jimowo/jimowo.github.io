@@ -3275,6 +3275,62 @@ class Solution {
 4. 确定遍历顺序
 5. 举例推导dp数组
 
+### [剑指 Offer 42. 连续子数组的最大和](https://leetcode.cn/problems/lian-xu-zi-shu-zu-de-zui-da-he-lcof/)
+
+输入一个整型数组，数组中的一个或连续多个整数组成一个子数组。求所有子数组的和的最大值。
+
+要求时间复杂度为O(n)。
+
+```
+输入: nums = [-2,1,-3,4,-1,2,1,-5,4]
+输出: 6
+解释: 连续子数组 [4,-1,2,1] 的和最大，为 6。
+```
+
+```java
+class Solution {
+    public int maxSubArray(int[] nums) {
+        // dp[i] 表示以第i个数结尾的最大连续数组和
+        int[] dp = new int[nums.length];
+        dp[0] = nums[0];
+        int max = dp[0];    // max 记录最大的连续子数组和
+        // dp 数组初始状态
+        for (int i = 1; i < nums.length; i++) {
+            if (dp[i - 1] <= 0) {
+                dp[i] = nums[i];
+            } else {
+                dp[i] = dp[i - 1] + nums[i];
+            }
+            max = Math.max(max, dp[i]);
+        }
+        return max;
+    }
+}
+```
+
+**优化dp 数组内存占用 只用O(1)的空间存储前一个dp 值就行**
+
+```java
+class Solution {
+    public int maxSubArray(int[] nums) {
+        int dp = nums[0];
+        int max = nums[0];    // max 记录最大的连续子数组和
+        // dp 数组初始状态
+        for (int i = 1; i < nums.length; i++) {
+            if (dp <= 0) {
+                dp = nums[i];
+            } else {
+                dp += nums[i];
+            }
+            max = Math.max(max, dp);
+        }
+        return max;
+    }
+}
+```
+
+
+
 ### 509 斐波那契数
 
 斐波那契数 （通常用 F(n) 表示）形成的序列称为 斐波那契数列 。该数列由 0 和 1 开始，后面的每一项数字都是前面两项数字的和。也就是：
