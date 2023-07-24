@@ -3806,6 +3806,15 @@ class Solution {
 
 ### dfs搜索框架(图论)
 
+1. 递归参数
+   - 如果是在矩阵中递归 参数为行列索引 i，j
+2. 终止条件
+3. 递推
+   - 已经遍历过的区域是否需要打上标记防止重复访问
+   - 朝各个方向开始递归
+   - 如果打过标记 是否需要还原
+4. 返回值
+
 ```java
 void dfs(int[][] grid, int r, int c) {
     // 1. 在遍历二维列表的过程中，从一个点向四周遍历
@@ -3832,11 +3841,50 @@ boolean inArea(int[][] grid, int r, int c) {
     return 0 <= r && r < grid.length 
         	&& 0 <= c && c < grid[0].length;
 }
-
-作者：nettee
-链接：https://leetcode.cn/problems/number-of-islands/solution/dao-yu-lei-wen-ti-de-tong-yong-jie-fa-dfs-bian-li-/
-来源：力扣（LeetCode）
 ```
+
+### [剑指 Offer 12. 矩阵中的路径](https://leetcode.cn/problems/ju-zhen-zhong-de-lu-jing-lcof/)
+
+给定一个 m x n 二维字符网格 board 和一个字符串单词 word 。如果 word 存在于网格中，返回 true ；否则，返回 false 。
+
+单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。
+
+例如，在下面的 3×4 的矩阵中包含单词 "ABCCED"（单词中的字母已标出）。
+
+![img](https://assets.leetcode.com/uploads/2020/11/04/word2.jpg)
+
+```java
+class Solution {
+    public boolean exist(char[][] board, String word) {
+        char[] words = word.toCharArray();
+
+        for(int i = 0; i < board.length; i++) {
+            for(int j = 0; j < board[0].length; j++) {
+                if(dfs(board, words, i, j, 0)) return true;
+            }
+        }
+        return false;
+    }
+
+    boolean dfs(char[][] board, char[] word, int i, int j, int k) {
+        // 如果超出数组边界 或不满足word中的单词则返回false
+        if(i >= board.length || i < 0 ||
+            j >= board[0].length || j < 0 ||
+            board[i][j] != word[k]) return false;
+        // word 中的所有字母都匹配完 说明包含该字母
+        if(k == word.length - 1) return true;
+        // 防止访问同一片区域 遍历过的区域打上标记
+        board[i][j] = '\0';
+        boolean res = dfs(board, word, i + 1, j, k + 1) || dfs(board, word, i - 1, j, k + 1) || 
+                      dfs(board, word, i, j + 1, k + 1) || dfs(board, word, i , j - 1, k + 1);
+        // 撤销标记
+        board[i][j] = word[k];
+        return res;
+    }
+}
+```
+
+
 
 ### 200 岛屿数量
 
@@ -3876,7 +3924,7 @@ class Solution {
     }
 
     /**
-     * 每发现一个岛屿 就把与之相邻的陆地都淹掉
+     * 把与之相邻的陆地都淹掉
      * @param grid 图
      * @param i 行
      * @param j 列
