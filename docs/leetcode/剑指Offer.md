@@ -58,3 +58,35 @@ class Solution {
 }
 ```
 
+## [剑指 Offer 14- I. 剪绳子](https://leetcode.cn/problems/jian-sheng-zi-lcof/)
+
+### 思路
+
+动态规划题
+
+重复子问题为不同长度的绳子 剪完子段的最大乘积
+
+状态转移：`dp[i]` 与前面的状态有什么关系
+长度`i` 剪一段`j` ，分为长度`j` 和长度`i-j` 两段，这时最大乘积就有两种选择，一种是最大乘积为这两段的乘积`j×(1-j)` ，两一种是将其中一段继续剪，那样最大乘积就为`j×dp[i-j]`。
+这样就确定了状态转移方程
+
+### 题解
+
+```java
+class Solution {
+    public int cuttingRope(int n) {
+        int[] dp = new int[n + 1];
+        dp[2] = 1;
+        for (int i = 3; i <  n + 1; i++) {
+            int curMax = 0;
+            // 遍历所有剪法 找到一个当前长度的乘积最大剪法
+            for (int j = 2; i - j > 0; j++) {
+                curMax = Math.max(dp[i - j] * j, (i - j) * j);
+                dp[i] = Math.max(dp[i], curMax);
+            }
+        }
+        return dp[n];
+    }
+}
+```
+
