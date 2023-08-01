@@ -55,7 +55,7 @@ export default navbar([
     children: [
       { text: "设计模式", icon: "condition", link: "设计模式笔记", },
       { text: "朝花夕拾", icon: "write", link: "朝花夕拾", },
-      { text: "面经", icon: "book", link: "面经整理", },
+      { text: "面经", icon: "write", link: "面经整理", },
     ],
   },
 ]);
