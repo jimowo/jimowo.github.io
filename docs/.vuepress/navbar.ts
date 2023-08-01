@@ -45,6 +45,7 @@ export default navbar([
     prefix: "/leetcode/",
     children: [
       { text: "刷题", icon: "rank", link: "LeetCode 刷题", },
+      { text: "剑指Offer", icon: "rank", link: "剑指Offer", },
     ],
   },
   {

@@ -2,7 +2,7 @@
 title: 剑指Offer
 author: jimowo
 icon: rank
-date: 2022-07-25
+date: 2022-07-26
 order: 2
 category:
   - 算法
@@ -86,6 +86,64 @@ class Solution {
             }
         }
         return dp[n];
+    }
+}
+```
+
+## [剑指 Offer 14- II. 剪绳子 II](https://leetcode.cn/problems/jian-sheng-zi-ii-lcof/)
+
+### 思路
+
+该题与上题逻辑相同，多了一步大数取模
+
+在每一步的操作上都要取模，取模后的结果无法用`Math.max()`来比较，所以本体无法使用动态规划
+
+使用贪心算法，每3剪一次绳，此时的乘积最大
+
+### 题解
+
+```java
+class Solution {
+    public int cuttingRope(int n) {
+        if(n == 2)
+            return 1;
+        if(n == 3)
+            return 2;
+        long res = 1;
+        while(n > 4){
+            res *= 3;
+            res = res % 1000000007;
+            n -= 3;
+        }
+        return (int)(res * n % 1000000007);
+    }
+}
+```
+
+## [剑指 Offer 16. 数值的整数次方](https://leetcode.cn/problems/shu-zhi-de-zheng-shu-ci-fang-lcof/)
+
+### 思路
+
+常规的循环相乘x 的方法会超时
+
+使用快速幂法，二分法的思路，把幂指数二分，这样时间复杂度就变成了log2N
+
+```java
+class Solution {
+    public double myPow(double x, int n) {
+        if(x == 0) return 0;
+        long b = n;
+        double res = 1.0;
+        if(b < 0) {
+            x = 1 / x;
+            b = -b;
+        }
+        while(b > 0) {
+            if((b % 2) == 1) res *= x;
+            x *= x;
+            b /= 2;
+        }
+        return res;
     }
 }
 ```
