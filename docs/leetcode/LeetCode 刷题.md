@@ -43,6 +43,48 @@ class Solution {
 }
 ```
 
+### 33 旋转数组的二分查找
+
+```java
+class Solution {
+    public int search(int[] nums, int target) {
+        if (nums == null || nums.length < 1) return -1;
+
+        return binarySearch(nums, target, 0, nums.length - 1);
+    }
+
+    int binarySearch(int[] arr, int target, int l, int r) {
+        int left = l;
+        int right = r;
+
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+
+            if (arr[mid] == target) {
+                return mid;
+            }
+            // 判断mid的左右哪边是升序数组
+            if (arr[l] <= arr[mid]) {
+                if (arr[l] <= target && target < arr[mid]) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            } else {
+                if (arr[mid] < target && target <= arr[r]) {
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
+            }
+        }
+        return -1;
+    }
+}
+```
+
+
+
 ### 739 每日温度
 
 给定一个整数数组 temperatures ，表示每天的温度，返回一个数组 answer ，其中 answer[i] 是指对于第 i 天，下一个更高温度出现在几天后。如果气温在这之后都不会升高，请在该位置用 0 来代替。
@@ -2193,6 +2235,46 @@ class MonotonicQueue {
 }
 ```
 
+### 84 柱状图中最大的矩形（单调栈）
+
+```java
+class Solution {
+    public int largestRectangleArea(int[] heights) {
+
+        int length = heights.length;
+        if (length == 0) return 0;
+        if (length == 1) return heights[0];
+
+        int maxSize = 0;
+        
+        // 哨兵
+        int[] newHeights = new int[length + 2];
+        System.arraycopy(heights, 0, newHeights, 1, length);
+        newHeights[0] = 0;
+        newHeights[length + 1] = 0;
+        length += 2;
+        heights = newHeights; 
+
+        Deque<Integer> stack = new ArrayDeque<>(length);
+        stack.addLast(0);
+        for (int i = 1; i < length; i++) {
+            // 如果需要入栈的数大于栈中最后一个数 先把栈中的数从后往前依次出栈
+            // 直到小于该数
+            while (heights[i] < heights[stack.peekLast()]) {
+                // 此时可以确定出栈柱形对应的最大矩形
+                int curHeight = heights[stack.pollLast()];
+                int curWidth = i - stack.peekLast() - 1;
+                maxSize = Math.max(curWidth * curHeight, maxSize);
+            }
+            stack.addLast(i);
+
+        }
+
+        return maxSize;
+    }
+}
+```
+
 
 
 ## 5 二叉树
@@ -2551,6 +2633,203 @@ class Solution {
 }
 ```
 
+## 技巧 前缀和
+
+### 560 和为 K 的子数组
+
+```java
+class Solution {
+    public int subarraySum(int[] nums, int k) {
+        Map<Integer, Integer> mp = new HashMap<Integer, Integer>(); // Map记录前缀和出现的次数
+        mp.put(0, 1);
+        int prefix = 0;
+        int res = 0;
+        // 
+        for (int i = 0; i < nums.length; i++) {
+            prefix += nums[i];
+            // 当前前缀和与前面的某一个前缀和之差 = k
+            // 说明存在连续的数和为k
+            if (mp.containsKey(prefix - k)) 
+                res += mp.get(prefix - k);
+            mp.put(prefix, mp.getOrDefault(prefix, 0) + 1);
+        }
+        return res;
+    }
+}
+```
+
+### 437 路径总和（二叉树中的前缀和）
+
+（DFS+ 前缀和Map）
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+
+    Map<Long, Integer> mp = new HashMap<Long, Integer>();
+
+    public int pathSum(TreeNode root, int targetSum) {
+        mp.put(0L, 1);
+        return dfs(root, targetSum, 0);
+    }
+
+    int dfs(TreeNode node, int k, long pre) {
+        if (node == null) return 0;
+        
+        int ret = 0;
+        pre += node.val;
+        if (mp.containsKey(pre - k))
+            ret = mp.get(pre - k);
+        mp.put(pre, mp.getOrDefault(pre, 0) + 1);
+        
+        ret += dfs(node.left, k, pre);
+        ret += dfs(node.right, k, pre);
+        // 需要回溯
+        mp.put(pre, mp.getOrDefault(pre, 0) - 1);
+
+        return ret;
+    }
+}
+```
+
+## 技巧 前缀树
+
+### 基本字典树
+
+```java
+class Trie {
+
+    class Node {
+        char val;
+        boolean hasWord;
+        Node[] children = new Node[26]; // 对应26个字母
+
+        Node() {};
+        Node(char val) {
+            this.val = val;
+        };
+    }
+
+    Node root;
+
+    public Trie() {
+        root = new Node();
+    }
+    
+    public void insert(String word) {
+        if (word == null || word == "") return;
+        Node cur = root;
+        for (int i = 0; i < word.length(); i++) {
+            char c = word.charAt(i);
+            if (cur.children[c - 'a'] == null)
+                cur.children[c - 'a'] = new Node(c);
+            cur = cur.children[c - 'a'];
+        }
+        cur.hasWord = true;
+    }
+    
+    public boolean search(String word) {
+        Node cur = searchPrefix(word);
+        // 判断是否遍历到叶子节点
+        if (!cur.hasWord) return false;
+        return true;
+    }
+    
+    public boolean startsWith(String prefix) {
+        return searchPrefix(prefix) != null;
+    }
+
+    private Node searchPrefix(String prefix) {
+        if (prefix == null || prefix == "") return true;
+        Node cur = root;
+        for (int i = 0; i < prefix.length(); i++) {
+            char c = prefix.charAt(i);
+            if (cur.children[c - 'a'] == null)
+                return null;
+            cur = cur.children[c - 'a'];
+        }
+        return cur;
+    }
+}
+
+/**
+ * Your Trie object will be instantiated and called as such:
+ * Trie obj = new Trie();
+ * obj.insert(word);
+ * boolean param_2 = obj.search(word);
+ * boolean param_3 = obj.startsWith(prefix);
+ */
+```
+
+### 820 单词的压缩编码
+
+倒着插入单词到前缀树即可以判断后缀
+
+```java
+class Solution {
+    public int minimumLengthEncoding(String[] words) {
+        int len = 0;
+        Trie trie = new Trie();
+        // 先对单词列表根据单词长度由长到短排序
+        Arrays.sort(words, (s1, s2) -> s2.length() - s1.length());
+        // 单词插入trie，返回该单词增加的编码长度
+        for (String word: words) {
+            len += trie.insert(word);
+        }
+        return len;
+    }
+}
+
+// 定义tire
+class Trie {
+    
+    TrieNode root;
+    
+    public Trie() {
+        root = new TrieNode();
+    }
+
+    public int insert(String word) {
+        TrieNode cur = root;
+        boolean isNew = false;
+        // 倒着插入单词
+        for (int i = word.length() - 1; i >= 0; i--) {
+            int c = word.charAt(i) - 'a';
+            if (cur.children[c] == null) {
+                isNew = true; // 是新单词
+                cur.children[c] = new TrieNode();
+            }
+            cur = cur.children[c];
+        }
+        // 如果是新单词的话编码长度增加新单词的长度+1，否则不变。
+        return isNew? word.length() + 1: 0;
+    }
+}
+
+class TrieNode {
+    char val;
+    TrieNode[] children = new TrieNode[26];
+
+    public TrieNode() {}
+}
+```
+
+
+
 ## 技巧 差分数组
 
 假设你有⼀个⻓度为 n 的数组，初始情况下所有的数字均为 0，你将会被给出 k 个更新的操作。 其中，每个操作会被表示为⼀个三元组：[startIndex, endIndex, inc]，你需要将⼦数组 A[startIndex ... endIndex]（包括 startIndex 和 endIndex）增加 inc。 请你返回 k 次操作后的数组。
@@ -2716,6 +2995,10 @@ class Solution {
     }
 }
 ```
+
+### 技巧 并查集（集合 连通问题）
+
+
 
 ## 6 回溯算法
 
@@ -3567,6 +3850,45 @@ class Solution {
         }
         // 输出结果
         return dpTable[1];
+    }
+}
+```
+
+### 337 打家劫舍3（数组结构的动态规划）
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    Map<TreeNode, Integer> f = new HashMap<>(); // 存储选中当前节点的最高金额
+    Map<TreeNode, Integer> g = new HashMap<>(); // 存储不选中当前节点的最高金额
+    
+    public int rob(TreeNode root) {
+        dfs(root);
+        return Math.max(f.getOrDefault(root, 0), g.getOrDefault(root, 0));
+    }
+
+    void dfs(TreeNode node) {
+        if (node == null) return;
+
+        dfs(node.left);
+        dfs(node.right);
+        f.put(node, node.val + g.getOrDefault(node.left, 0) + g.getOrDefault(node.right, 0));
+        g.put(node, Math.max(f.getOrDefault(node.left, 0), g.getOrDefault(node.left, 0)) +
+                    Math.max(f.getOrDefault(node.right, 0), g.getOrDefault(node.right, 0)));
     }
 }
 ```
