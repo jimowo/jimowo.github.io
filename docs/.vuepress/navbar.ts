@@ -57,6 +57,7 @@ export default navbar([
       { text: "朝花夕拾", icon: "write", link: "朝花夕拾", },
       { text: "面经", icon: "write", link: "面经整理", },
       { text: "机考记录", icon: "write", link: "机考记录", },
+      { text: "一些数组操作", icon: "write", link: "一些数组操作", },
     ],
   },
 ]);
