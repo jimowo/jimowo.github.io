@@ -1,0 +1,1 @@
+import{_ as t,o,c as a,a as e,b as c}from"./app-ff5a96d8.js";const n={},r=e("h1",{id:"介绍页",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#介绍页","aria-hidden":"true"},"#"),c(" 介绍页")],-1),s=e("p",null,"此博客用来记录看过的书，做过的项目",-1),_=[r,s];function d(i,l){return o(),a("div",null,_)}const f=t(n,[["render",d],["__file","intro.html.vue"]]);export{f as default};
